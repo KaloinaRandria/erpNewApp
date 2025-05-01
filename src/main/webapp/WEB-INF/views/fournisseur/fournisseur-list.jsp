@@ -36,15 +36,11 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Code</th>
                                 <th>Nom</th>
                                 <th>Groupe</th>
                                 <th>Type</th>
                                 <th>Pays</th>
                                 <th>Langue</th>
-                                <th>Email</th>
-                                <th>Téléphone</th>
-                                <th>Adresse</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -53,15 +49,11 @@
                                     for (Supplier s : suppliers) {
                             %>
                             <tr>
-                                <td><%= s.getName() %></td>
                                 <td><%= s.getSupplierName() %></td>
                                 <td><%= s.getSupplierGroup() %></td>
                                 <td><%= s.getSupplierType() %></td>
                                 <td><%= s.getCountry() %></td>
                                 <td><%= s.getLanguage() %></td>
-                                <td><%= s.getEmailId() %></td>
-                                <td><%= s.getMobileNo() %></td>
-                                <td><%= s.getPrimaryAddress() %></td>
                             </tr>
                             <%
                                 }

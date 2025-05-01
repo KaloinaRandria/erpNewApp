@@ -30,10 +30,27 @@ public class ErpNextAuthController {
 
         if (sessionInfo != null) {
             model.addAttribute("sessionInfo", sessionInfo);
-            return "redirect:/erpnext/suppliers";
+//            return "redirect:/erpnext/suppliers";
+            return "redirect:/accueil";
         } else {
             model.addAttribute("error", "Erreur d'authentification ERPNext.");
             return "login/login";
         }
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session, HttpServletResponse response) {
+        // Invalider la session
+        session.invalidate();
+
+        // Supprimer le cookie 'sid'
+        Cookie cookie = new Cookie("sid", null);
+        cookie.setPath("/"); // Assurez-vous que le path est correct
+        cookie.setMaxAge(0); // Supprime immédiatement le cookie
+        response.addCookie(cookie);
+
+        // Redirection vers la page de login
+        return "redirect:/";
+    }
+
 }
