@@ -1,11 +1,16 @@
 package mg.working.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import mg.working.model.fournisseur.Supplier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ErpNextSupplierService {
@@ -15,22 +20,47 @@ public class ErpNextSupplierService {
     @Value("${erpnext.url}")
     private String erpnextUrl;
 
-    public String getSuppliers(String sid) {
-        String url = erpnextUrl + "/api/resource/Supplier";
+    private ObjectMapper objectMapper = new ObjectMapper();
 
+
+    public List<Supplier> getSuppliers(String sid) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String resource = "Supplier";
+        String fieldsParam = "[\"*\"]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                String.class
-        );
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 
-        return response.getBody(); // ou parser en objet Java si tu préfères
+        System.out.println("Body " + response.getBody());
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode dataNode = root.get("data");
+
+            List<Supplier> suppliers = new ArrayList<>();
+            for (JsonNode node : dataNode) {
+                Supplier supplier = new Supplier();
+                supplier.setName(node.path("name").asText(null));
+                supplier.setSupplierName(node.path("supplier_name").asText(null));
+                supplier.setSupplierGroup(node.path("supplier_group").asText(null));
+                supplier.setSupplierType(node.path("supplier_type").asText(null));
+                supplier.setCountry(node.path("country").asText(null));
+                supplier.setLanguage(node.path("language").asText(null));
+                supplier.setEmailId(node.path("email_id").asText(null));
+                supplier.setMobileNo(node.path("mobile_no").asText(null));
+                supplier.setPrimaryAddress(node.path("primary_address").asText(null));
+
+                suppliers.add(supplier);
+            }
+            return suppliers;
+        } else {
+            throw new Exception("Échec de la récupération des fournisseurs : " + response.getStatusCode());
+        }
     }
+
 }
+
+
