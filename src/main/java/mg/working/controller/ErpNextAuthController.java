@@ -22,10 +22,10 @@ public class ErpNextAuthController {
 
         if (sessionInfo != null) {
             model.addAttribute("sessionInfo", sessionInfo);
-            return "/succes-login"; // correspond à templates/erpnext-dashboard.html
+            return "/succes-login";
         } else {
             model.addAttribute("error", "Erreur d'authentification ERPNext.");
-            return "login/login"; // correspond à templates/login.html
+            return "login/login";
         }
     }
 }
