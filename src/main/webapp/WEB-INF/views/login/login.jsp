@@ -30,7 +30,7 @@
                                     <p class="text-center small">Enter your username & password to login</p>
                                 </div>
 
-                                <form class="row g-3 needs-validation" novalidate method="post" action="">
+                                <form class="row g-3 needs-validation" novalidate method="post" action="/erpnext/session-info">
 
                                     <div class="col-12">
                                         <label for="user" class="form-label">Nom Utilisateur</label>
@@ -43,7 +43,7 @@
 
                                     <div class="col-12">
                                         <label for="mdp" class="form-label">mot de passe</label>
-                                        <input type="password" name="mdp" class="form-control" id="mdp" required>
+                                        <input type="password" name="pwd" class="form-control" id="mdp" required>
                                         <div class="invalid-feedback">Entrer votre mot de passe</div>
                                     </div>
 
