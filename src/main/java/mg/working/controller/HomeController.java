@@ -9,4 +9,9 @@ public class HomeController {
     public String goToLoginPage() {
         return "login/login";
     }
+
+    @GetMapping("/accueil")
+    public String goToAccueil() {
+        return "/accueil";
+    }
 }
