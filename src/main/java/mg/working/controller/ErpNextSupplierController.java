@@ -47,6 +47,5 @@ public class ErpNextSupplierController {
             return "error";
         }
     }
-    
 
 }
