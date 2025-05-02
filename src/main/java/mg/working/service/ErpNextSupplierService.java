@@ -3,6 +3,7 @@ package mg.working.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mg.working.model.fournisseur.Supplier;
+import mg.working.model.fournisseur.SupplierQuotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,40 @@ public class ErpNextSupplierService {
             throw new Exception("Échec de la récupération des fournisseurs : " + response.getStatusCode());
         }
     }
+
+    public List<SupplierQuotation> getSupplierQuotations(String sid) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String resource = "Supplier Quotation";
+        String fieldsParam = "[\"*\"]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode dataNode = root.get("data");
+
+            List<SupplierQuotation> quotations = new ArrayList<>();
+            for (JsonNode node : dataNode) {
+                SupplierQuotation quotation = new SupplierQuotation();
+                quotation.setName(node.path("name").asText(null));
+                quotation.setSupplier(node.path("supplier").asText(null));
+                quotation.setTransactionDate(node.path("transaction_date").asText(null));
+                quotation.setStatus(node.path("status").asText(null));
+                quotation.setCurrency(node.path("currency").asText(null));
+                quotation.setGrandTotal(node.path("grand_total").asDouble(0));
+                quotations.add(quotation);
+            }
+            return quotations;
+        } else {
+            throw new Exception("Erreur lors de la récupération des demandes de devis : " + response.getStatusCode());
+        }
+    }
+
 
 }
 
