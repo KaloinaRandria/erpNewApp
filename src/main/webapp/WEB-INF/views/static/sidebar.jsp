@@ -18,6 +18,13 @@
         </li><!-- End Dashboard Nav -->
 
         <li class="nav-item">
+            <a class="nav-link collapsed" href="/erpnext/supplier-quotations">
+                <i class="bi bi-grid"></i>
+                <span>Demande de Devis</span>
+            </a>
+        </li><!-- End Dashboard Nav -->
+
+        <li class="nav-item">
             <a class="nav-link collapsed" href="index.html">
                 <i class="bi bi-grid"></i>
                 <span>Comptabilite</span>

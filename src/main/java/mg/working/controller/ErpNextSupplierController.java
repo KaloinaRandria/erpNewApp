@@ -2,6 +2,7 @@ package mg.working.controller;
 
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.fournisseur.Supplier;
+import mg.working.model.fournisseur.SupplierQuotation;
 import mg.working.service.ErpNextSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +31,22 @@ public class ErpNextSupplierController {
         return "fournisseur/fournisseur-list";
     }
 
+    @GetMapping("/supplier-quotations")
+    public String listSupplierQuotations(HttpSession session, Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
 
+        try {
+            List<SupplierQuotation> quotations = supplierService.getSupplierQuotations(sid);
+            model.addAttribute("quotations", quotations);
+            return "fournisseur/fournisseur-devis-list";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "error";
+        }
+    }
+    
 
 }
