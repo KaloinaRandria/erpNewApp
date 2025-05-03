@@ -65,7 +65,16 @@
                                 <td><%= item.getItemCode() %></td>
                                 <td><%= item.getDescription() %></td>
                                 <td><%= item.getQty() %></td>
-                                <td><%= item.getRate() %> <%= devis.getCurrency() %></td>
+                                <td>
+                                    <form action="/erpnext/update-item-price" method="post" class="d-flex align-items-center">
+                                        <input type="hidden" name="sid" value="<%= session.getAttribute("sid") %>" />
+                                        <input type="hidden" name="quotationName" value="<%= devis.getName() %>" />
+                                        <input type="hidden" name="itemName" value="<%= item.getName() %>" />
+                                        <input type="number" step="0.01" name="newRate" value="<%= item.getRate() %>" class="form-control form-control-sm me-2" required />
+                                        <button type="submit" class="btn btn-sm btn-primary">Modifier</button>
+                                    </form>
+                                </td>
+
                                 <td><%= item.getAmount() %> <%= devis.getCurrency() %></td>
                             </tr>
                             <%

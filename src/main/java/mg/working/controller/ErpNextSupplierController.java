@@ -1,16 +1,17 @@
 package mg.working.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import mg.working.model.fournisseur.RequestForQuotation;
+import mg.working.model.fournisseur.RequestForQuotationSupplier;
 import mg.working.model.fournisseur.Supplier;
 import mg.working.model.fournisseur.SupplierQuotation;
 import mg.working.service.ErpNextSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import java.util.List;
@@ -30,6 +31,28 @@ public class ErpNextSupplierController {
         List<Supplier> suppliers = supplierService.getSuppliers(session.getAttribute("sid").toString());
         model.addAttribute("suppliers", suppliers);
         return "fournisseur/fournisseur-list";
+    }
+
+    @GetMapping("/request-for-quotation")
+    public String getRQF(HttpSession session, Model model) throws Exception {
+        if (session.getAttribute("sid").toString() == null) {
+            return "redirect:/login"; // ou une page d’erreur
+        }
+        List<RequestForQuotation> rfqs = supplierService.getRequestsForQuotation(session.getAttribute("sid").toString());
+        model.addAttribute("rfqs", rfqs);
+        return "fournisseur/demande-devis-list";
+    }
+
+    @GetMapping("/request-for-quotation/{rfqName}")
+    public String getSupplierByRfQ(@PathVariable String rfqName , HttpSession session, Model model) throws Exception {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        List<RequestForQuotationSupplier> rfqs = supplierService.getSuppliersByRfQ(sid,rfqName);
+        model.addAttribute("rfqs", rfqs);
+        return "fournisseur/devis-supplier-list";
     }
 
     @GetMapping("/supplier-quotations")
@@ -65,6 +88,42 @@ public class ErpNextSupplierController {
             return "error";
         }
     }
+
+
+
+    @PostMapping("/update-item-price")
+    public String updateItemPrice(
+            @RequestParam String itemName,
+            @RequestParam String quotationName,
+            @RequestParam String newRate,
+            HttpSession session,
+            Model model) {
+
+        try {
+            String sid = (String) session.getAttribute("sid");
+            if (sid == null) {
+                model.addAttribute("errorMessage", "Session expirée. Veuillez vous reconnecter.");
+                return "redirect:/login"; // ou "redirect:/login" selon ta gestion d’auth
+            }
+
+            double rate = Double.parseDouble(newRate);
+            supplierService.updateItemRate(sid, itemName, rate);
+
+            model.addAttribute("success", "true");
+            model.addAttribute("successMessage", "Taux mis à jour avec succès pour l'élément : " + itemName);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            model.addAttribute("success", "false");
+            model.addAttribute("errorMessage", "Taux invalide : " + newRate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("success", "false");
+            model.addAttribute("errorMessage", "Erreur lors de la mise à jour du taux : " + e.getMessage());
+        }
+
+        return "redirect:/erpnext/supplier-quotations/" + quotationName;
+    }
+
 
 
 }

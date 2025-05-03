@@ -18,7 +18,7 @@
         </li><!-- End Dashboard Nav -->
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/erpnext/supplier-quotations">
+            <a class="nav-link collapsed" href="/erpnext/request-for-quotation">
                 <i class="bi bi-grid"></i>
                 <span>Demande de Devis</span>
             </a>
