@@ -26,7 +26,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Liste Fournisseurs</h1>
+        <h1>Liste Demande Devis</h1>
     </div><!-- End Page Title -->
 
     <section class="section">
@@ -59,6 +59,9 @@
                                 <td><%= q.getStatus() %></td>
                                 <td><%= q.getCurrency() %></td>
                                 <td><%= q.getGrandTotal() %></td>
+                                <td>
+                                    <a href="/erpnext/supplier-quotations/<%= q.getName() %>" class="btn btn-sm btn-primary">Détail</a>
+                                </td>
                             </tr>
                             <%
                                 }
