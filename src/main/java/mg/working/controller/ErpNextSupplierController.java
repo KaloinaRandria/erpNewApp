@@ -7,6 +7,8 @@ import mg.working.model.fournisseur.RequestForQuotationSupplier;
 import mg.working.model.fournisseur.Supplier;
 import mg.working.model.fournisseur.SupplierQuotation;
 import mg.working.model.fournisseur.commande.PurchaseOrder;
+import mg.working.model.fournisseur.facture.Facture;
+import mg.working.service.ErpNextPurchaseInvoiceService;
 import mg.working.service.ErpNextPurchaseOrderService;
 import mg.working.service.ErpNextSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,10 @@ public class ErpNextSupplierController {
 
     @Autowired
     private ErpNextPurchaseOrderService erpNextPurchaseOrderService;
+
+    @Autowired
+    private ErpNextPurchaseInvoiceService erpNextPurchaseInvoiceService;
+
     @GetMapping("/suppliers")
     public String getSuppliers(HttpSession session, Model model) throws Exception {
         if (session.getAttribute("sid").toString() == null) {
@@ -163,7 +169,23 @@ public class ErpNextSupplierController {
             model.addAttribute("error", e.getMessage());
             return "error";
         }
+    }
 
+    @GetMapping("/purchase-invoice")
+    public String getAllFacture(Model model , HttpSession session) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            model.addAttribute("errorMessage", "Session expirée. Veuillez vous reconnecter.");
+            return "redirect:/login"; // ou "redirect:/login" selon ta gestion d’auth
+        }
+        try {
+            List<Facture> factures = erpNextPurchaseInvoiceService.getFacturesPayees(sid);
+            model.addAttribute("factures", factures);
+            return "fournisseur/facture/purchase-invoice-list";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "error";
+        }
     }
 
 }

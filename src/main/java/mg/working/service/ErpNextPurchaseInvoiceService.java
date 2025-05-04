@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -53,6 +54,48 @@ public class ErpNextPurchaseInvoiceService {
             return factures;
         } else {
             throw new Exception("Erreur lors de la récupération des factures : " + response.getStatusCode());
+        }
+    }
+
+    public List<Facture> getFacturesPayees(String sid) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = UriComponentsBuilder
+                .fromHttpUrl(erpnextUrl + "/api/resource/Purchase Invoice")
+                .queryParam("fields", "[\"name\",\"status\",\"outstanding_amount\",\"supplier\",\"posting_date\",\"grand_total\"]")
+                .queryParam("filters", "[[\"docstatus\",\"=\",1]]")
+                .build(false)
+                .toUriString();
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode data = root.get("data");
+
+            List<Facture> factures = new ArrayList<>();
+            for (JsonNode node : data) {
+                double reste = node.path("outstanding_amount").asDouble(0);
+                String statut = node.path("status").asText(null);
+
+//                if (reste == 0 || "Received".equalsIgnoreCase(statut)) {
+                    Facture facture = new Facture();
+                    facture.setName(node.path("name").asText(null));
+                    facture.setSupplier(node.path("supplier").asText(null));
+                    facture.setGrandTotal(node.path("grand_total").asDouble(0));
+                    facture.setOutstandingAmount(reste);
+                    facture.setStatus(statut);
+
+                    factures.add(facture);
+//                }
+            }
+
+            return factures;
+        } else {
+            throw new Exception("Échec de récupération des factures : " + response.getStatusCode());
         }
     }
 }
