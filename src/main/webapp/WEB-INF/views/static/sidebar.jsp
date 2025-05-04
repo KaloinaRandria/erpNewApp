@@ -17,29 +17,29 @@
             </a>
         </li><!-- End Dashboard Nav -->
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="/erpnext/request-for-quotation">
-                <i class="bi bi-grid"></i>
-                <span>Request For Quotation</span>
-            </a>
-        </li><!-- End Dashboard Nav -->
+<%--        <li class="nav-item">--%>
+<%--            <a class="nav-link collapsed" href="/erpnext/request-for-quotation">--%>
+<%--                <i class="bi bi-grid"></i>--%>
+<%--                <span>Request For Quotation</span>--%>
+<%--            </a>--%>
+<%--        </li><!-- End Dashboard Nav -->--%>
+
+<%--        <li class="nav-item">--%>
+<%--            <a class="nav-link collapsed" href="/erpnext/supplier-quotations">--%>
+<%--                <i class="bi bi-grid"></i>--%>
+<%--                <span>Supplier Quotation</span>--%>
+<%--            </a>--%>
+<%--        </li><!-- End Dashboard Nav -->--%>
+
+<%--        <li class="nav-item">--%>
+<%--            <a class="nav-link collapsed" href="">--%>
+<%--                <i class="bi bi-grid"></i>--%>
+<%--                <span>Purchase Order</span>--%>
+<%--            </a>--%>
+<%--        </li><!-- End Dashboard Nav -->--%>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="/erpnext/supplier-quotations">
-                <i class="bi bi-grid"></i>
-                <span>Supplier Quotation</span>
-            </a>
-        </li><!-- End Dashboard Nav -->
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="">
-                <i class="bi bi-grid"></i>
-                <span>Purchase Order</span>
-            </a>
-        </li><!-- End Dashboard Nav -->
-
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="index.html">
+            <a class="nav-link collapsed" href="/erpnext/purchase-invoice">
                 <i class="bi bi-grid"></i>
                 <span>Comptabilite</span>
             </a>
