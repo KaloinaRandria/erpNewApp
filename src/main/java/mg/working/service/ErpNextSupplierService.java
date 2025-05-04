@@ -166,6 +166,43 @@ public class ErpNextSupplierService {
         }
     }
 
+    public List<SupplierQuotation> getSupplierQuotationsBySupplier(String sid, String supplier) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String resource = "Supplier Quotation";
+        String fieldsParam = "[\"*\"]";
+        String filtersParam = "[[\"Supplier Quotation\", \"supplier\", \"=\", \"" + supplier + "\"]]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam + "&filters=" + filtersParam;
+
+        System.out.println("Url : " + url);
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode dataNode = root.get("data");
+
+            List<SupplierQuotation> quotations = new ArrayList<>();
+            for (JsonNode node : dataNode) {
+                SupplierQuotation quotation = new SupplierQuotation();
+                quotation.setName(node.path("name").asText(null));
+                quotation.setSupplier(node.path("supplier").asText(null));
+                quotation.setTransactionDate(node.path("transaction_date").asText(null));
+                quotation.setStatus(node.path("status").asText(null));
+                quotation.setCurrency(node.path("currency").asText(null));
+                quotation.setGrandTotal(node.path("grand_total").asDouble(0));
+                quotations.add(quotation);
+            }
+            return quotations;
+        } else {
+            throw new Exception("Erreur lors de la récupération des devis fournisseurs pour : " + supplier + " - " + response.getStatusCode());
+        }
+    }
+
+
 
     public SupplierQuotation getSupplierQuotationByName(String sid, String name) throws Exception {
         HttpHeaders headers = new HttpHeaders();

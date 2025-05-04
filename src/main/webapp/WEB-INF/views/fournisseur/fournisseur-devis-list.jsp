@@ -4,10 +4,6 @@
 <%@ page import="mg.working.model.fournisseur.SupplierQuotation" %>
 
 
-<%
-    List<Supplier> suppliers = (List<Supplier>) request.getAttribute("suppliers");
-%>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,6 +18,8 @@
 
 <!-- ======= Sidebar ======= -->
 <%@include file="../static/sidebar.jsp" %>
+
+
 
 <main id="main" class="main">
 
@@ -48,7 +46,7 @@
                             </thead>
                             <tbody>
                             <%
-                                List<SupplierQuotation> quotations = (List<SupplierQuotation>) request.getAttribute("quotations");
+                                List<SupplierQuotation> quotations = (List<SupplierQuotation>) request.getAttribute("quotations1");
                                 if (quotations != null) {
                                     for (SupplierQuotation q : quotations) {
                             %>
