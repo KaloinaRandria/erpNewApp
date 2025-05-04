@@ -84,7 +84,7 @@
                         </table>
 
                         <div class="text-end mt-4">
-                            <a href="/erpnext/supplier-quotations" class="btn btn-secondary">Retour à la liste</a>
+                            <a href="/erpnext/supplier-devis/<%=devis.getSupplier()%>" class="btn btn-secondary">Retour à la liste</a>
                         </div>
                     </div>
                 </div>

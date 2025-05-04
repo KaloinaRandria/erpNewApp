@@ -62,6 +62,9 @@
                             %>
                             </tbody>
                         </table>
+                        <div class="text-end mt-4">
+                            <a href="/erpnext/suppliers" class="btn btn-secondary">Retour à la liste</a>
+                        </div>
                     </div>
                 </div>
             </div>
