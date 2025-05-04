@@ -54,6 +54,9 @@
                                 <td><%= s.getSupplierType() %></td>
                                 <td><%= s.getCountry() %></td>
                                 <td><%= s.getLanguage() %></td>
+                                <td>
+                                    <a href="/erpnext/supplier-devis/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Devis</a>
+                                </td>
                             </tr>
                             <%
                                 }

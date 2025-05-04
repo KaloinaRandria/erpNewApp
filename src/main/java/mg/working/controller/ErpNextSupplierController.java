@@ -124,6 +124,24 @@ public class ErpNextSupplierController {
         return "redirect:/erpnext/supplier-quotations/" + quotationName;
     }
 
+    @GetMapping("/supplier-devis/{supplier}")
+    public String listQuotationsBySupplier(
+            @PathVariable String supplier,
+            Model model , HttpSession session) {
 
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            model.addAttribute("errorMessage", "Session expirée. Veuillez vous reconnecter.");
+            return "redirect:/login"; // ou "redirect:/login" selon ta gestion d’auth
+        }
+        try {
+            List<SupplierQuotation> quotations = supplierService.getSupplierQuotationsBySupplier(sid, supplier);
+            model.addAttribute("quotations1", quotations);
+            return "fournisseur/fournisseur-devis-list";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "error";
+        }
+    }
 
 }
