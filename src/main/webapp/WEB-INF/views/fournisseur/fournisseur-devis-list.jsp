@@ -1,10 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.Supplier" %>
+<%@ page import="mg.working.model.fournisseur.SupplierQuotation" %>
 
-<%
-    List<Supplier> suppliers = (List<Supplier>) request.getAttribute("suppliers");
-%>
 
 
 <!DOCTYPE html>
@@ -21,10 +19,12 @@
 <!-- ======= Sidebar ======= -->
 <%@include file="../static/sidebar.jsp" %>
 
+
+
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Liste Fournisseurs</h1>
+        <h1>Liste Demande Devis</h1>
     </div><!-- End Page Title -->
 
     <section class="section">
@@ -35,46 +35,46 @@
 
                         <table class="table">
                             <thead>
-                            <tr>
-                                <th>Nom</th>
-                                <th>Groupe</th>
-                                <th>Type</th>
-                                <th>Pays</th>
-                                <th>Langue</th>
-                            </tr>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Fournisseur</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                    <th>Devise</th>
+                                    <th>Total</th>
+                                </tr>
                             </thead>
                             <tbody>
                             <%
-                                if (suppliers != null) {
-                                    for (Supplier s : suppliers) {
+                                List<SupplierQuotation> quotations = (List<SupplierQuotation>) request.getAttribute("quotations1");
+                                if (quotations != null) {
+                                    for (SupplierQuotation q : quotations) {
                             %>
                             <tr>
-                                <td><%= s.getSupplierName() %></td>
-                                <td><%= s.getSupplierGroup() %></td>
-                                <td><%= s.getSupplierType() %></td>
-                                <td><%= s.getCountry() %></td>
-                                <td><%= s.getLanguage() %></td>
+                                <td><%= q.getName() %></td>
+                                <td><%= q.getSupplier() %></td>
+                                <td><%= q.getTransactionDate() %></td>
+                                <td><%= q.getStatus() %></td>
+                                <td><%= q.getCurrency() %></td>
+                                <td><%= q.getGrandTotal() %></td>
                                 <td>
-                                    <a href="/erpnext/supplier-devis/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Devis</a>
-                                </td>
-                                <td>
-                                    <a href="/erpnext/purchase-order/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Commande</a>
+                                    <a href="/erpnext/supplier-quotations/<%= q.getName() %>" class="btn btn-sm btn-primary">Détail</a>
                                 </td>
                             </tr>
                             <%
                                 }
                             } else {
                             %>
-                            <tr><td colspan="9">Aucun fournisseur trouvé.</td></tr>
+                            <tr><td colspan="6">Aucune demande de devis trouvée.</td></tr>
                             <%
                                 }
                             %>
-
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 
