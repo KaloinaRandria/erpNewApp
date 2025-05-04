@@ -6,6 +6,8 @@ import mg.working.model.fournisseur.RequestForQuotation;
 import mg.working.model.fournisseur.RequestForQuotationSupplier;
 import mg.working.model.fournisseur.Supplier;
 import mg.working.model.fournisseur.SupplierQuotation;
+import mg.working.model.fournisseur.commande.PurchaseOrder;
+import mg.working.service.ErpNextPurchaseOrderService;
 import mg.working.service.ErpNextSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,8 @@ public class ErpNextSupplierController {
     @Autowired
     private ErpNextSupplierService supplierService;
 
+    @Autowired
+    private ErpNextPurchaseOrderService erpNextPurchaseOrderService;
     @GetMapping("/suppliers")
     public String getSuppliers(HttpSession session, Model model) throws Exception {
         if (session.getAttribute("sid").toString() == null) {
@@ -142,6 +146,24 @@ public class ErpNextSupplierController {
             model.addAttribute("error", e.getMessage());
             return "error";
         }
+    }
+
+    @GetMapping("/purchase-order/{supplier}")
+    public String getAllCommande(@PathVariable String supplier ,Model model , HttpSession session) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            model.addAttribute("errorMessage", "Session expirée. Veuillez vous reconnecter.");
+            return "redirect:/login"; // ou "redirect:/login" selon ta gestion d’auth
+        }
+        try {
+            List<PurchaseOrder> purchaseOrders = erpNextPurchaseOrderService.getAllPurchaseOrders(sid , supplier);
+            model.addAttribute("purchaseOrders", purchaseOrders);
+            return "fournisseur/commande/purchase-order-list";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "error";
+        }
+
     }
 
 }

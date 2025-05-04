@@ -58,7 +58,7 @@
                                     <a href="/erpnext/supplier-devis/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Devis</a>
                                 </td>
                                 <td>
-                                    <a href="" class="btn btn-sm btn-primary">Voir Commande</a>
+                                    <a href="/erpnext/purchase-order/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Commande</a>
                                 </td>
                             </tr>
                             <%

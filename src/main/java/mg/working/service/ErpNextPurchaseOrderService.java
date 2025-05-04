@@ -25,14 +25,17 @@ public class ErpNextPurchaseOrderService {
     @Autowired
     private ErpNextPurchaseInvoiceService erpNextPurchaseInvoiceService;
 
-    public List<PurchaseOrder> getAllPurchaseOrders(String sid) throws Exception {
+    public List<PurchaseOrder> getAllPurchaseOrders(String sid, String supplierName) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String resource = "Purchase Order";
         String fieldsParam = "[\"name\", \"supplier\", \"transaction_date\", \"status\", \"grand_total\", \"currency\"]";
-        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
+
+        // Ajout du filtre par nom du fournisseur (supplier)
+        String filtersParam = "[[\"Purchase Order\", \"supplier\", \"=\", \"" + supplierName + "\"]]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam + "&filters=" + filtersParam;
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -50,7 +53,7 @@ public class ErpNextPurchaseOrderService {
                 order.setStatus(node.path("status").asText(null));
                 order.setGrandTotal(node.path("grand_total").asDouble(0));
                 order.setCurrency(node.path("currency").asText(null));
-                List<Facture> factures = this.erpNextPurchaseInvoiceService.getFacturesByCommande(sid,order.getName());
+                List<Facture> factures = this.erpNextPurchaseInvoiceService.getFacturesByCommande(sid, order.getName());
                 order.setFactures(factures);
                 orders.add(order);
             }
@@ -59,5 +62,6 @@ public class ErpNextPurchaseOrderService {
             throw new Exception("Erreur lors de la récupération des bons de commande : " + response.getStatusCode());
         }
     }
+
 
 }
