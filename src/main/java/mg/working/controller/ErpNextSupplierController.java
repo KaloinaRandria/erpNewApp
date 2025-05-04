@@ -188,4 +188,31 @@ public class ErpNextSupplierController {
         }
     }
 
+    @PostMapping("/purchase-invoice/pay")
+    public String payerFacture(
+            @RequestParam String invoiceName,
+            HttpSession session,
+            Model model) {
+
+        try {
+            String sid = (String) session.getAttribute("sid");
+            if (sid == null) {
+                model.addAttribute("errorMessage", "Session expirée. Veuillez vous reconnecter.");
+                return "redirect:/login";
+            }
+
+            erpNextPurchaseInvoiceService.payerFacture(sid, invoiceName);
+
+            model.addAttribute("success", "true");
+            model.addAttribute("successMessage", "Paiement effectué avec succès pour la facture : " + invoiceName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("success", "false");
+            model.addAttribute("errorMessage", "Erreur lors du paiement : " + e.getMessage());
+        }
+
+        return "redirect:/erpnext/purchase-invoice";
+    }
+
+
 }

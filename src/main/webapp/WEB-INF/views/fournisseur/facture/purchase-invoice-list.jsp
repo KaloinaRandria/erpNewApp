@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.facture.Facture" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
     List<Facture> factures = (List<Facture>) request.getAttribute("factures");
@@ -32,6 +33,7 @@
                                 <th>Montant Total</th>
                                 <th>Montant Restant</th>
                                 <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -45,12 +47,31 @@
                                 <td><%= f.getGrandTotal() %> Ar</td>
                                 <td><%= f.getOutstandingAmount() %> Ar</td>
                                 <td><%= f.getStatus() %></td>
+                                <td>
+                                    <%
+                                        if (f.getOutstandingAmount() > 0) {
+                                    %>
+                                    <form method="post" action="/erpnext/purchase-invoice/pay" style="display:inline;">
+                                        <input type="hidden" name="invoiceName" value="<%= f.getName() %>" />
+                                        <button type="submit" class="btn btn-success btn-sm"
+                                                onclick="return confirm('Confirmer le paiement de la facture <%= f.getName() %> ?');">
+                                            Payer
+                                        </button>
+                                    </form>
+                                    <%
+                                    } else {
+                                    %>
+                                    <span class="text-muted">Déjà payé</span>
+                                    <%
+                                        }
+                                    %>
+                                </td>
                             </tr>
                             <%
                                 }
                             } else {
                             %>
-                            <tr><td colspan="5">Aucune facture trouvée.</td></tr>
+                            <tr><td colspan="6">Aucune facture trouvée.</td></tr>
                             <%
                                 }
                             %>
