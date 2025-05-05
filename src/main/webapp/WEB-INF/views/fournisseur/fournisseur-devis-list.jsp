@@ -2,7 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.Supplier" %>
 <%@ page import="mg.working.model.fournisseur.SupplierQuotation" %>
-
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 
 <!DOCTYPE html>
@@ -56,7 +56,7 @@
                                 <td><%= q.getTransactionDate() %></td>
                                 <td><%= q.getStatus() %></td>
                                 <td><%= q.getCurrency() %></td>
-                                <td><%= q.getGrandTotal() %></td>
+                                <td><%= Formatutil.formaterMontant(q.getGrandTotal())  %></td>
                                 <td>
                                     <a href="/erpnext/supplier-quotations/<%= q.getName() %>" class="btn btn-sm btn-primary">Détail</a>
                                 </td>

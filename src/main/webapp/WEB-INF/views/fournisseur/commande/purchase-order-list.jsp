@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.commande.PurchaseOrder" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 <%
     List<PurchaseOrder> commandes = (List<PurchaseOrder>) request.getAttribute("purchaseOrders");
@@ -48,7 +49,7 @@
                                 <td><%= po.getTransactionDate() %></td>
                                 <td><%= po.getStatus() %></td>
                                 <td><%= po.getCurrency() %></td>
-                                <td><%= po.getGrandTotal() %></td>
+                                <td><%= Formatutil.formaterMontant(po.getGrandTotal()) %></td>
                                 <td><%= po.isPayee() ? "Oui" : "Non" %></td>
                                 <td><%= po.isRecu() ? "Oui" : "Non" %></td>
                             </tr>

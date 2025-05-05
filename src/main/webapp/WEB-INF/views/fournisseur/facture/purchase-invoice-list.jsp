@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.facture.Facture" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
@@ -44,8 +45,8 @@
                             <tr>
                                 <td><%= f.getName() %></td>
                                 <td><%= f.getSupplier() %></td>
-                                <td><%= f.getGrandTotal() %> Ar</td>
-                                <td><%= f.getOutstandingAmount() %> Ar</td>
+                                <td><%= Formatutil.formaterMontant(f.getGrandTotal())  %> Ar</td>
+                                <td><%= Formatutil.formaterMontant(f.getOutstandingAmount()) %> Ar</td>
                                 <td><%= f.getStatus() %></td>
                                 <td>
                                     <%
