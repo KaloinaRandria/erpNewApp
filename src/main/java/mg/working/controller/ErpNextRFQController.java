@@ -1,6 +1,7 @@
 package mg.working.controller;
 
 import jakarta.servlet.http.HttpSession;
+import mg.working.model.fournisseur.RQFUtils.RequestForQuotationDetail;
 import mg.working.model.fournisseur.RequestForQuotation;
 import mg.working.service.ErpNextRequestForQuotationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,4 +42,21 @@ public class ErpNextRFQController {
         }
 
     }
+
+    @GetMapping("/detail/{rfqName}")
+    public String getRfqDetail(@PathVariable String rfqName, HttpSession session, Model model) {
+        if (session.getAttribute("sid") == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            RequestForQuotationDetail detail = requestForQuotationService.getRfqDetailByName(session.getAttribute("sid").toString(), rfqName);
+            model.addAttribute("rfqDetail", detail);
+            return "/fournisseur/devis/request-for-quotation-detail";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "error";
+        }
+    }
+
 }

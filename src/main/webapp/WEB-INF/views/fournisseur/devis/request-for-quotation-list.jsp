@@ -50,7 +50,7 @@
                                 <td><%= rqf.getStatus() %></td>
                                 <td><%= rqf.getTransactionDate() %></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-primary">Voir Détail</a>
+                                    <a href="/erpnext/request-for-quotation/detail/<%= rqf.getName() %>" class="btn btn-sm btn-primary">Voir Détail</a>
                                 </td>
                             </tr>
                             <%
