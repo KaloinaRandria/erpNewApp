@@ -55,7 +55,7 @@
                                 <td><%= s.getCountry() %></td>
                                 <td><%= s.getLanguage() %></td>
                                 <td>
-                                    <a href="/erpnext/supplier-devis/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Devis</a>
+                                    <a href="/erpnext/request-for-quotation/get/<%= java.net.URLEncoder.encode(s.getName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Demande de Devis</a>
                                 </td>
                                 <td>
                                     <a href="/erpnext/purchase-order/<%= java.net.URLEncoder.encode(s.getSupplierName(), "UTF-8") %>" class="btn btn-sm btn-primary">Voir Commande</a>
