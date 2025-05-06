@@ -31,12 +31,6 @@
 <%--            </a>--%>
 <%--        </li><!-- End Dashboard Nav -->--%>
 
-<%--        <li class="nav-item">--%>
-<%--            <a class="nav-link collapsed" href="">--%>
-<%--                <i class="bi bi-grid"></i>--%>
-<%--                <span>Purchase Order</span>--%>
-<%--            </a>--%>
-<%--        </li><!-- End Dashboard Nav -->--%>
 
         <li class="nav-item">
             <a class="nav-link collapsed" href="/erpnext/purchase-invoice">
