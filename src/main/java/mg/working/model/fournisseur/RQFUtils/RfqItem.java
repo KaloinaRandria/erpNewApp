@@ -12,5 +12,6 @@ public class RfqItem {
     private Double qty;
     private String uom;
     private String warehouse;
+    private Double rate;
     // Getters / Setters
 }
