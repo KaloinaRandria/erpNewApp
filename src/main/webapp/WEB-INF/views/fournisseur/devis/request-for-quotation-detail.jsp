@@ -52,55 +52,57 @@
                         </ul>
 
                         <hr>
-                        <form action="/erpnext/request-for-quotation/supplier-quotation/save" method="post" class="d-flex align-items-center">
+                        <form action="/erpnext/request-for-quotation/supplier-quotation/save" method="post" class="d-flex flex-column">
+
                             <!-- Champs cachés pour le nom de la RFQ et le fournisseur -->
                             <input type="hidden" name="rfqName" value="<%= rfq.getName() %>" />
                             <% if (!suppliers.isEmpty()) { %>
                             <input type="hidden" name="supplier" value="<%= suppliers.get(0).getSupplier() %>" />
                             <% } %>
 
-                        <h4 class="mt-4">Articles demandés</h4>
-                        <table class="table table-bordered table-striped mt-3">
-                            <thead class="table-primary">
-                            <tr>
-                                <th>Code</th>
-                                <th>Nom</th>
-                                <th>Description</th>
-                                <th>Quantité</th>
-                                <th>Unité</th>
-                                <th>Entrepôt</th>
-                                <th>Prix Unitaire</th>
+                            <h4 class="mt-4">Articles demandés</h4>
+                            <table class="table table-bordered table-striped mt-3">
+                                <thead class="table-primary">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Description</th>
+                                    <th>Quantité</th>
+                                    <th>Unité</th>
+                                    <th>Entrepôt</th>
+                                    <th>Prix Unitaire</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <% for (RfqItem item : items) { %>
+                                <tr>
+                                    <td><%= item.getItemCode() %></td>
+                                    <td><%= item.getItemName() %></td>
+                                    <td><%= item.getDescription() %></td>
+                                    <td><%= item.getQty() %></td>
+                                    <td><%= item.getUom() %></td>
+                                    <td><%= item.getWarehouse() %></td>
+                                    <td>
+                                        <input type="hidden" name="itemCode" value="<%= item.getItemCode() %>" />
+                                        <input type="hidden" name="warehouse" value="<%= item.getWarehouse() %>" />
+                                        <input type="hidden" name="qty" value="<%= item.getQty() %>" />
+                                        <input type="number" step="0.01" name="newRate" value="0.0" class="form-control form-control-sm me-2" required />
+                                    </td>
 
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <% for (RfqItem item : items) { %>
-                            <tr>
-                                <td><%= item.getItemCode() %></td>
-                                <td><%= item.getItemName() %></td>
-                                <td><%= item.getDescription() %></td>
-                                <td><%= item.getQty() %></td>
-                                <td><%= item.getUom() %></td>
-                                <td><%= item.getWarehouse() %></td>
-                                <td>
-                                    <input type="hidden" name="itemCode" value="<%= item.getItemCode() %>" />
-                                    <input type="hidden" name="warehouse" value="<%= item.getWarehouse() %>" />
-                                    <input type="hidden" name="qty" value="<%= item.getQty() %>" />
-                                    <input type="number" step="0.01" name="newRate" value="0.0" class="form-control form-control-sm me-2" required />
-                                </td>
+                                </tr>
+                                <% } %>
+                                </tbody>
+                            </table>
 
-                            </tr>
-                            <% } %>
-                            </tbody>
-                        </table>
-                            <div class="row">
-                                <div class="text-start mt-4">
-                                    <button href="" class="btn btn-success">Cree un Devis</button>
-                                </div>
-                                <div class="text-end mt-4">
-                                    <a href="/erpnext/suppliers" class="btn btn-secondary">Retour à la liste</a>
-                                </div>
+                            <!-- Conteneur pour les boutons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <!-- Bouton "Crée un Devis" -->
+                                <button type="submit" class="btn btn-success btn-lg shadow-lg">Crée un Devis</button>
+
+                                <!-- Bouton "Retour à la liste" -->
+                                <a href="/erpnext/suppliers" class="btn btn-secondary btn-lg shadow-lg">Retour à la liste</a>
                             </div>
+
                         </form>
                     </div>
                 </div>
