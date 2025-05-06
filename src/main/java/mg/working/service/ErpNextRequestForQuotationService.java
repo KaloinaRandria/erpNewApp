@@ -134,6 +134,8 @@ public class ErpNextRequestForQuotationService {
         quotationJson.put("transaction_date", LocalDate.now().toString());
         quotationJson.put("rfq", rfqName);
 
+        quotationJson.put("currency", "MAD");
+
         ArrayNode itemsArray = objectMapper.createArrayNode();
         for (RfqItem rfqItem : items) {
             ObjectNode itemJson = objectMapper.createObjectNode();
