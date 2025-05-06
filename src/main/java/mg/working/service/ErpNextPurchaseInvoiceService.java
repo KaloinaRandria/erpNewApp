@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import mg.working.model.fournisseur.facture.Facture;
+import mg.working.model.fournisseur.facture.FactureItem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -185,5 +186,52 @@ public class ErpNextPurchaseInvoiceService {
         System.out.println("✅ Paiement soumis avec succès pour la facture : " + nomFacture);
     }
 
+
+    public Facture getPurchaseInvoiceByName(String sid, String name) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = erpnextUrl + "/api/resource/Purchase Invoice/" + name;
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody()).get("data");
+
+            Facture invoice = new Facture();
+            invoice.setName(root.path("name").asText(null));
+            invoice.setSupplier(root.path("supplier").asText(null));
+            invoice.setPostingDate(root.path("posting_date").asText(null));
+            invoice.setStatus(root.path("status").asText(null));
+            invoice.setCurrency(root.path("currency").asText(null));
+            invoice.setGrandTotal(root.path("grand_total").asDouble(0));
+            invoice.setOutstandingAmount(root.path("outstanding_amount").asDouble(0));
+
+            // Parsing des items
+            List<FactureItem> items = new ArrayList<>();
+            JsonNode itemsNode = root.get("items");
+
+            if (itemsNode != null && itemsNode.isArray()) {
+                for (JsonNode itemNode : itemsNode) {
+                    FactureItem item = new FactureItem();
+                    item.setItemCode(itemNode.path("item_code").asText(null));
+                    item.setItemName(itemNode.path("item_name").asText(null));
+                    item.setDescription(itemNode.path("description").asText(null));
+                    item.setQty(itemNode.path("qty").asDouble(0));
+                    item.setRate(itemNode.path("rate").asDouble(0));
+                    item.setAmount(itemNode.path("amount").asDouble(0));
+                    items.add(item);
+                }
+            }
+
+            invoice.setItems(items);
+
+            return invoice;
+        } else {
+            throw new Exception("Impossible de charger la facture : " + response.getStatusCode());
+        }
+    }
 
 }

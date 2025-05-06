@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpSession;
 import mg.working.model.fournisseur.RQFUtils.RequestForQuotationDetail;
 import mg.working.model.fournisseur.RQFUtils.RfqItem;
 import mg.working.model.fournisseur.RequestForQuotation;
-import mg.working.model.fournisseur.SupplierQuotation;
 import mg.working.service.ErpNextRequestForQuotationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
