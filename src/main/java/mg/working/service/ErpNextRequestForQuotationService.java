@@ -2,10 +2,14 @@ package mg.working.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import mg.working.model.fournisseur.RQFUtils.RequestForQuotationDetail;
 import mg.working.model.fournisseur.RQFUtils.RfqItem;
 import mg.working.model.fournisseur.RQFUtils.RfqSupplierInfo;
 import mg.working.model.fournisseur.RequestForQuotation;
+import mg.working.model.fournisseur.SupplierQuotation;
+import mg.working.model.fournisseur.SupplierQuotationItem;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,5 +116,91 @@ public class ErpNextRequestForQuotationService {
             throw new Exception("Erreur lors de la récupération du RFQ : " + response.getStatusCode());
         }
     }
+
+    public void createSupplierQuotation(
+            String sid,
+            String rfqName,
+            String supplier,
+            List<RfqItem> items
+    ) throws Exception {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ObjectNode quotationJson = objectMapper.createObjectNode();
+        quotationJson.put("doctype", "Supplier Quotation");
+        quotationJson.put("supplier", supplier);
+        quotationJson.put("transaction_date", LocalDate.now().toString());
+        quotationJson.put("rfq", rfqName);
+
+        ArrayNode itemsArray = objectMapper.createArrayNode();
+        for (RfqItem rfqItem : items) {
+            ObjectNode itemJson = objectMapper.createObjectNode();
+            itemJson.put("item_code", rfqItem.getItemCode());
+            itemJson.put("qty", rfqItem.getQty() != null ? rfqItem.getQty() : 1);
+            itemJson.put("rate", rfqItem.getRate() != null ? rfqItem.getRate() : 0);
+            itemJson.put("warehouse", rfqItem.getWarehouse());
+
+            if (rfqItem.getDescription() != null) {
+                itemJson.put("description", rfqItem.getDescription());
+            }
+
+            itemsArray.add(itemJson);
+        }
+
+        quotationJson.set("items", itemsArray);
+
+        // Création du devis
+        String urlCreate = erpnextUrl + "/api/resource/Supplier Quotation";
+        HttpEntity<String> createRequest = new HttpEntity<>(quotationJson.toString(), headers);
+        ResponseEntity<String> createResponse = restTemplate.exchange(urlCreate, HttpMethod.POST, createRequest, String.class);
+
+        if (!createResponse.getStatusCode().is2xxSuccessful()) {
+            throw new Exception("Échec de la création du devis : " + createResponse.getBody());
+        }
+
+        String quotationName = objectMapper.readTree(createResponse.getBody())
+                .path("data").path("name").asText();
+
+        // Soumission du devis
+        String urlSubmit = erpnextUrl + "/api/resource/Supplier Quotation/" +
+                URLEncoder.encode(quotationName, StandardCharsets.UTF_8) + "?_submit=1";
+        HttpEntity<String> submitRequest = new HttpEntity<>("{}", headers);
+        ResponseEntity<String> submitResponse = restTemplate.exchange(urlSubmit, HttpMethod.PUT, submitRequest, String.class);
+
+        if (!submitResponse.getStatusCode().is2xxSuccessful()) {
+            throw new Exception("Échec de la soumission du devis : " + submitResponse.getBody());
+        }
+
+        // Mapping final
+        JsonNode data = objectMapper.readTree(submitResponse.getBody()).path("data");
+
+        SupplierQuotation quotation = new SupplierQuotation();
+        quotation.setName(data.path("name").asText());
+        quotation.setSupplier(data.path("supplier").asText());
+        quotation.setTransactionDate(data.path("transaction_date").asText());
+        quotation.setStatus(data.path("status").asText());
+        quotation.setCurrency(data.path("currency").asText());
+        quotation.setGrandTotal(data.path("grand_total").asDouble());
+
+        List<SupplierQuotationItem> itemList = new ArrayList<>();
+        for (JsonNode itemNode : data.path("items")) {
+            SupplierQuotationItem item = new SupplierQuotationItem();
+            item.setName(itemNode.path("name").asText());
+            item.setItemCode(itemNode.path("item_code").asText());
+            item.setDescription(itemNode.path("description").asText());
+            item.setQty(itemNode.path("qty").asDouble());
+            item.setRate(itemNode.path("rate").asDouble());
+            item.setAmount(itemNode.path("amount").asDouble());
+            item.setWarehouse(itemNode.path("warehouse").asText());
+            itemList.add(item);
+        }
+
+        quotation.setItems(itemList);
+
+        // Tu peux retourner quotation si nécessaire
+    }
+
 
 }

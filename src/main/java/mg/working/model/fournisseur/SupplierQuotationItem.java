@@ -13,5 +13,6 @@ public class SupplierQuotationItem {
     private double rate;
     private double amount;
     private String name;
+    private String warehouse;
 }
 
