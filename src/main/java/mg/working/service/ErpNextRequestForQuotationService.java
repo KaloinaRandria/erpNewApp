@@ -151,7 +151,7 @@ public class ErpNextRequestForQuotationService {
 
         quotationJson.set("items", itemsArray);
 
-        // Création du devis
+        // Création du Supplier Quotation
         String urlCreate = erpnextUrl + "/api/resource/Supplier Quotation";
         HttpEntity<String> createRequest = new HttpEntity<>(quotationJson.toString(), headers);
         ResponseEntity<String> createResponse = restTemplate.exchange(urlCreate, HttpMethod.POST, createRequest, String.class);
@@ -163,44 +163,32 @@ public class ErpNextRequestForQuotationService {
         String quotationName = objectMapper.readTree(createResponse.getBody())
                 .path("data").path("name").asText();
 
-        // Soumission du devis
-        String urlSubmit = erpnextUrl + "/api/resource/Supplier Quotation/" +
-                URLEncoder.encode(quotationName, StandardCharsets.UTF_8) + "?_submit=1";
-        HttpEntity<String> submitRequest = new HttpEntity<>("{}", headers);
-        ResponseEntity<String> submitResponse = restTemplate.exchange(urlSubmit, HttpMethod.PUT, submitRequest, String.class);
+        // Récupérer le document complet
+        String getQuotationUrl = erpnextUrl + "/api/resource/Supplier Quotation/" + quotationName;
+        HttpEntity<String> getRequest = new HttpEntity<>(headers);
+        ResponseEntity<String> getResponse = restTemplate.exchange(getQuotationUrl, HttpMethod.GET, getRequest, String.class);
+
+        if (!getResponse.getStatusCode().is2xxSuccessful()) {
+            throw new Exception("Échec de la récupération du devis pour soumission : " + getResponse.getBody());
+        }
+
+        JsonNode fullDoc = objectMapper.readTree(getResponse.getBody()).get("data");
+
+        // Soumission avec frappe.client.submit
+        String submitUrl = erpnextUrl + "/api/method/frappe.client.submit";
+        ObjectNode submitPayload = objectMapper.createObjectNode();
+        submitPayload.put("doc", objectMapper.writeValueAsString(fullDoc));
+
+        HttpEntity<String> submitRequest = new HttpEntity<>(submitPayload.toString(), headers);
+        ResponseEntity<String> submitResponse = restTemplate.postForEntity(submitUrl, submitRequest, String.class);
 
         if (!submitResponse.getStatusCode().is2xxSuccessful()) {
             throw new Exception("Échec de la soumission du devis : " + submitResponse.getBody());
         }
 
-        // Mapping final
-        JsonNode data = objectMapper.readTree(submitResponse.getBody()).path("data");
-
-        SupplierQuotation quotation = new SupplierQuotation();
-        quotation.setName(data.path("name").asText());
-        quotation.setSupplier(data.path("supplier").asText());
-        quotation.setTransactionDate(data.path("transaction_date").asText());
-        quotation.setStatus(data.path("status").asText());
-        quotation.setCurrency(data.path("currency").asText());
-        quotation.setGrandTotal(data.path("grand_total").asDouble());
-
-        List<SupplierQuotationItem> itemList = new ArrayList<>();
-        for (JsonNode itemNode : data.path("items")) {
-            SupplierQuotationItem item = new SupplierQuotationItem();
-            item.setName(itemNode.path("name").asText());
-            item.setItemCode(itemNode.path("item_code").asText());
-            item.setDescription(itemNode.path("description").asText());
-            item.setQty(itemNode.path("qty").asDouble());
-            item.setRate(itemNode.path("rate").asDouble());
-            item.setAmount(itemNode.path("amount").asDouble());
-            item.setWarehouse(itemNode.path("warehouse").asText());
-            itemList.add(item);
-        }
-
-        quotation.setItems(itemList);
-
-        // Tu peux retourner quotation si nécessaire
+        System.out.println("✅ Devis fournisseur soumis avec succès : " + quotationName);
     }
+
 
 
 }
