@@ -12,6 +12,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <%@include file="../../static/head.jsp" %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <body>
 <%@include file="../../static/header.jsp" %>
@@ -19,37 +20,47 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Détail de la Facture - <%= facture.getName() %></h1>
+        <h1>Facture n° <%= facture.getName() %></h1>
+    </div>
+
+    <!-- BOUTONS EN DEHORS DE LA FACTURE -->
+    <div class="mb-3 d-flex justify-content-between">
+        <a href="/erpnext/purchase-invoice" class="btn btn-secondary shadow">Retour</a>
+        <button onclick="exportPDF()" class="btn btn-success shadow">Exporter en PDF</button>
     </div>
 
     <section class="section">
-        <div class="row">
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
 
-                        <h2 class="card-title text-primary text-center mb-4">
-                            Informations Générales
-                        </h2>
-                        <p><strong>Nom :</strong> <%= facture.getName() %></p>
-                        <p><strong>Fournisseur :</strong> <%= facture.getSupplier() %></p>
-                        <p><strong>Date :</strong> <%= facture.getPostingDate() %></p>
-                        <p><strong>Statut :</strong> <%= facture.getStatus() %></p>
-                        <p><strong>Montant Total :</strong> <%= Formatutil.formaterMontant(facture.getGrandTotal()) %> Ar</p>
-                        <p><strong>Montant Restant :</strong> <%= Formatutil.formaterMontant(facture.getOutstandingAmount()) %> Ar</p>
-                        <p><strong>Devise :</strong> <%= facture.getCurrency() %></p>
+                <!-- DIV À EXPORTER EN PDF -->
+                <div id="facture-content" class="card shadow">
+                    <div class="card-body p-4">
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Fournisseur</h5>
+                                <p><strong>Nom :</strong> <%= facture.getSupplier() %></p>
+                                <p><strong>Date :</strong> <%= facture.getPostingDate() %></p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5 class="text-primary">Facture</h5>
+                                <p><strong>Status :</strong> <%= facture.getStatus() %></p>
+                                <p><strong>Devise :</strong> <%= facture.getCurrency() %></p>
+                            </div>
+                        </div>
 
                         <hr>
 
-                        <h4 class="mt-4">Articles facturés</h4>
-                        <table class="table table-bordered table-striped mt-3">
-                            <thead class="table-primary">
+                        <h5 class="mb-3">Détail des Articles</h5>
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light text-center">
                             <tr>
-                                <th>Code Article</th>
+                                <th>Code</th>
                                 <th>Nom</th>
                                 <th>Description</th>
                                 <th>Quantité</th>
-                                <th>Prix Unitaire</th>
+                                <th>PU</th>
                                 <th>Montant</th>
                             </tr>
                             </thead>
@@ -59,25 +70,48 @@
                                 <td><%= item.getItemCode() %></td>
                                 <td><%= item.getItemName() %></td>
                                 <td><%= item.getDescription() %></td>
-                                <td><%= item.getQty() %></td>
-                                <td><%= Formatutil.formaterMontant(item.getRate()) %></td>
-                                <td><%= Formatutil.formaterMontant(item.getAmount()) %></td>
+                                <td class="text-end"><%= item.getQty() %></td>
+                                <td class="text-end"><%= Formatutil.formaterMontant(item.getRate()) %> Ar</td>
+                                <td class="text-end"><%= Formatutil.formaterMontant(item.getAmount()) %> Ar</td>
                             </tr>
                             <% } %>
                             </tbody>
                         </table>
 
-                        <div class="mt-4 d-flex justify-content-end">
-                            <a href="/erpnext/purchase-invoice" class="btn btn-secondary btn-lg shadow">Retour à la liste</a>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <p><strong>Montant Total :</strong> <%= Formatutil.formaterMontant(facture.getGrandTotal()) %> Ar</p>
+                                <p><strong>Montant Restant :</strong> <%= Formatutil.formaterMontant(facture.getOutstandingAmount()) %> Ar</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="fw-bold">Signature fournisseur :</p>
+                                <div style="height: 80px; border-bottom: 1px solid #999;"></div>
+                            </div>
                         </div>
 
                     </div>
                 </div>
+                <!-- FIN DE FACTURE À EXPORTER -->
+
             </div>
         </div>
     </section>
 </main>
 
 <%@include file="../../static/footer.jsp" %>
+
+<script>
+    function exportPDF() {
+        const element = document.getElementById("facture-content");
+        const opt = {
+            margin: 0.5,
+            filename: 'facture_<%= facture.getName() %>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
 </body>
 </html>
