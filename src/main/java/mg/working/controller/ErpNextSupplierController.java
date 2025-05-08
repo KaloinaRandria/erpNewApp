@@ -43,28 +43,6 @@ public class ErpNextSupplierController {
         return "fournisseur/fournisseur-list";
     }
 
-    @GetMapping("/request-for-quotation")
-    public String getRQF(HttpSession session, Model model) throws Exception {
-        if (session.getAttribute("sid").toString() == null) {
-            return "redirect:/login"; // ou une page d’erreur
-        }
-        List<RequestForQuotation> rfqs = supplierService.getRequestsForQuotation(session.getAttribute("sid").toString());
-        model.addAttribute("rfqs", rfqs);
-        return "fournisseur/demande-devis-list";
-    }
-
-    @GetMapping("/request-for-quotation/{rfqName}")
-    public String getSupplierByRfQ(@PathVariable String rfqName , HttpSession session, Model model) throws Exception {
-        String sid = (String) session.getAttribute("sid");
-        if (sid == null) {
-            return "redirect:/login";
-        }
-
-        List<RequestForQuotationSupplier> rfqs = supplierService.getSuppliersByRfQ(sid,rfqName);
-        model.addAttribute("rfqs", rfqs);
-        return "fournisseur/devis-supplier-list";
-    }
-
     @GetMapping("/supplier-quotations")
     public String listSupplierQuotations(HttpSession session, Model model) {
         String sid = (String) session.getAttribute("sid");

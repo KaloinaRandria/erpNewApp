@@ -48,7 +48,11 @@
                                 <td><%= Formatutil.formaterMontant(f.getGrandTotal())  %> Ar</td>
                                 <td><%= Formatutil.formaterMontant(f.getOutstandingAmount()) %> Ar</td>
                                 <td><%= f.getStatus() %></td>
+                                <td><a href="/erpnext/purchase-invoice/detail/<%=f.getName()%>" class="btn btn-primary btn-sm">
+                                    Voir Détail
+                                </a></td>
                                 <td>
+
                                     <%
                                         if (f.getOutstandingAmount() > 0) {
                                     %>

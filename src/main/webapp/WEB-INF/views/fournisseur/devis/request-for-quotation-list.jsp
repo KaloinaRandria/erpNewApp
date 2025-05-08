@@ -2,27 +2,27 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.fournisseur.RequestForQuotation" %>
 
-<%
-    List<RequestForQuotation> rfqs = (List<RequestForQuotation>) request.getAttribute("rfqs");
-%>
 
 <!DOCTYPE html>
 <html lang="en">
 
-<%@ include file="../static/head.jsp" %>
+<%@include file="../../static/head.jsp" %>
 
 <body>
 
 <!-- ======= Header ======= -->
-<%@ include file="../static/header.jsp" %>
+<%@include file="../../static/header.jsp" %>
+
 
 <!-- ======= Sidebar ======= -->
-<%@ include file="../static/sidebar.jsp" %>
+<%@include file="../../static/sidebar.jsp" %>
+
+
 
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Liste des Demandes de Devis (RFQ)</h1>
+        <h1>Liste Demande Devis</h1>
     </div><!-- End Page Title -->
 
     <section class="section">
@@ -34,34 +34,38 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>Code</th>
+                                <th>Nom</th>
+                                <th>Status</th>
                                 <th>Date</th>
-                                <th>Statut</th>
                             </tr>
                             </thead>
                             <tbody>
                             <%
-                                if (rfqs != null && !rfqs.isEmpty()) {
-                                    for (RequestForQuotation rfq : rfqs) {
+                                List<RequestForQuotation> requestForQuotations = (List<RequestForQuotation>) request.getAttribute("requestForQuotations");
+                                if (requestForQuotations != null) {
+                                    for (RequestForQuotation rqf : requestForQuotations) {
                             %>
                             <tr>
-                                <td><%= rfq.getName() %></td>
-                                <td><%= rfq.getTransactionDate() %></td>
-                                <td><%= rfq.getStatus() %></td>
+                                <td><%= rqf.getName() %></td>
+                                <td><%= rqf.getStatus() %></td>
+                                <td><%= rqf.getTransactionDate() %></td>
                                 <td>
-                                    <a href="/erpnext/request-for-quotation/<%= rfq.getName() %>" class="btn btn-sm btn-primary">Détail</a>
+                                    <a href="/erpnext/request-for-quotation/detail/<%= rqf.getName() %>" class="btn btn-sm btn-primary">Voir Détail</a>
                                 </td>
                             </tr>
                             <%
                                 }
                             } else {
                             %>
-                            <tr><td colspan="7">Aucune demande de devis trouvée.</td></tr>
+                            <tr><td colspan="6">Aucune demande de devis trouvée.</td></tr>
                             <%
                                 }
                             %>
                             </tbody>
                         </table>
+                        <div class="text-end mt-4">
+                            <a href="/erpnext/suppliers" class="btn btn-secondary">Retour à la liste</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,7 +77,7 @@
 
 <!-- ======= Footer ======= -->
 
-<%@ include file="../static/footer.jsp" %>
+<%@include file="../../static/footer.jsp" %>
 
 </body>
 
