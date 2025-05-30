@@ -11,25 +11,18 @@
         </li><!-- End Dashboard Nav -->
 
         <li class="nav-item">
+            <a class="nav-link collapsed" href="">
+                <i class="bi bi-grid"></i>
+                <span>Ressource Humaine</span>
+            </a>
+        </li><!-- End Dashboard Nav -->
+
+        <li class="nav-item">
             <a class="nav-link collapsed" href="/erpnext/suppliers">
                 <i class="bi bi-grid"></i>
                 <span>Fournisseur</span>
             </a>
         </li><!-- End Dashboard Nav -->
-
-<%--        <li class="nav-item">--%>
-<%--            <a class="nav-link collapsed" href="/erpnext/request-for-quotation">--%>
-<%--                <i class="bi bi-grid"></i>--%>
-<%--                <span>Request For Quotation</span>--%>
-<%--            </a>--%>
-<%--        </li><!-- End Dashboard Nav -->--%>
-
-<%--        <li class="nav-item">--%>
-<%--            <a class="nav-link collapsed" href="/erpnext/supplier-quotations">--%>
-<%--                <i class="bi bi-grid"></i>--%>
-<%--                <span>Supplier Quotation</span>--%>
-<%--            </a>--%>
-<%--        </li><!-- End Dashboard Nav -->--%>
 
 
         <li class="nav-item">
