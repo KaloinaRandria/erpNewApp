@@ -33,11 +33,20 @@
         </li><!-- End Dashboard Nav -->
 
         <li class="nav-item">
+            <a class="nav-link collapsed" href="/rh/import/import-page">
+                <i class="bi bi-grid"></i>
+                <span>Importation Donnees</span>
+            </a>
+        </li><!-- End Dashboard Nav -->
+
+        <li class="nav-item">
             <a class="nav-link collapsed" href="/erpnext/logout">
                 <i class="bi bi-box-arrow-in-right"></i>
                 <span>Deconnecter</span>
             </a>
         </li><!-- End Login Page Nav -->
+
+         
 
     </ul>
 
