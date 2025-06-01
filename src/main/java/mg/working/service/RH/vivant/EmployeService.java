@@ -7,7 +7,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,7 +46,6 @@ public class EmployeService {
         String resource = "Employee";
         String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
         String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
-        System.out.println("url = " + url);
         // Construction de la requête
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -78,6 +79,106 @@ public class EmployeService {
     }
 
 
+    public List<Employe> searchEmployes(String sid,
+                                        Optional<String> name,
+                                        Optional<String> employeeName,
+                                        Optional<String> gender,
+                                        Optional<String> department,
+                                        Optional<String> status) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Cookie", "sid=" + sid);
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode filtersArray = mapper.createArrayNode();
+
+        name.ifPresent(val -> {
+            if (!val.trim().isEmpty()) {
+                ArrayNode filter = filtersArray.addArray();
+                filter.add("Employee");
+                filter.add("name");
+                filter.add("like");
+                filter.add("%" + val + "%");
+            }
+        });
+
+        employeeName.ifPresent(val -> {
+            if (!val.trim().isEmpty()) {
+                ArrayNode filter = filtersArray.addArray();
+                filter.add("Employee");
+                filter.add("employee_name");
+                filter.add("like");
+                filter.add("%" + val + "%");
+            }
+        });
+
+        gender.ifPresent(val -> {
+            if (!val.trim().isEmpty()) {
+                ArrayNode filter = filtersArray.addArray();
+                filter.add("Employee");
+                filter.add("gender");
+                filter.add("=");
+                filter.add(val);
+            }
+        });
+
+        department.ifPresent(val -> {
+            if (!val.trim().isEmpty()) {
+                ArrayNode filter = filtersArray.addArray();
+                filter.add("Employee");
+                filter.add("department");
+                filter.add("=");
+                filter.add(val);
+            }
+        });
+
+        status.ifPresent(val -> {
+            if (!val.trim().isEmpty()) {
+                ArrayNode filter = filtersArray.addArray();
+                filter.add("Employee");
+                filter.add("status");
+                filter.add("=");
+                filter.add(val);
+            }
+        });
+
+
+        String filters = mapper.writeValueAsString(filtersArray);
+        String fields = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
+
+        String url = erpnextUrl + "/api/resource/Employee?fields=" + fields + "&filters=" + filters;
+
+        System.out.println("URL utilisée : " + url);
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la recherche des employés : " + response.getStatusCode());
+        }
+
+        JsonNode root = mapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        List<Employe> employes = new ArrayList<>();
+        for (JsonNode node : data) {
+            Employe emp = new Employe();
+            emp.setName(node.path("name").asText());
+            emp.setEmployee_name(node.path("employee_name").asText());
+            emp.setGender(node.path("gender").asText());
+            emp.setDesignation(node.path("designation").asText());
+            emp.setDepartment(node.path("department").asText());
+            emp.setStatus(node.path("status").asText());
+            emp.setDate_of_joining(node.path("date_of_joining").asText());
+            emp.setCompany(node.path("company").asText());
+            emp.setBranch(node.path("branch").asText());
+            emp.setCell_number(node.path("cell_number").asText());
+            emp.setCompany_email(node.path("company_email").asText());
+            employes.add(emp);
+        }
+
+        return employes;
+    }
 
 
     public List<String> importerEmployesDepuisCSV(String sid, String fileName) throws Exception {

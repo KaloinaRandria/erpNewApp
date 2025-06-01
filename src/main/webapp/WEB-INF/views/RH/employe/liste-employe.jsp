@@ -30,6 +30,51 @@
             <div class="col">
                 <div class="card">
                     <div class="card-body">
+                        <!-- Formulaire de recherche -->
+                        <form method="get" action="${pageContext.request.contextPath}/rh/employe/search" class="row g-3 mt-3 mb-4">
+
+                            <div class="col-md-3">
+                                <label for="name" class="form-label">Matricule</label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Ex: EMP-0001">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="employeeName" class="form-label">Nom complet</label>
+                                <input type="text" class="form-control" id="employeeName" name="employeeName" placeholder="Ex: Rakoto Jean">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="gender" class="form-label">Genre</label>
+                                <select id="gender" name="gender" class="form-select">
+                                    <option value="">-- Tous --</option>
+                                    <option value="Male">Homme</option>
+                                    <option value="Female">Femme</option>
+                                    <option value="Other">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="department" class="form-label">Département</label>
+                                <input type="text" class="form-control" id="department" name="department" placeholder="Ex: RH">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="status" class="form-label">Statut</label>
+                                <select id="status" name="status" class="form-select">
+                                    <option value="">-- Tous --</option>
+                                    <option value="Active">Actif</option>
+                                    <option value="Left">Parti</option>
+                                    <option value="Suspended">Suspendu</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-success mt-2">Rechercher</button>
+                                <a href="${pageContext.request.contextPath}/rh/employe/list" class="btn btn-secondary mt-2">Réinitialiser</a>
+                            </div>
+
+                        </form>
+
                         <table class="table">
                             <thead>
                             <tr>
