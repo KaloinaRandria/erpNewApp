@@ -34,47 +34,49 @@ public class EmployeService {
     private String erpnextUrl;
 
     public List<Employe> listerEmployes(String sid) throws Exception {
+
+        // Préparation des en-têtes HTTP avec le cookie de session
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String fields = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
-        String url = erpnextUrl + "/api/resource/Employee?fields=" + URLEncoder.encode(fields, StandardCharsets.UTF_8);
-
+        // Définition des champs à récupérer
+        String resource = "Employee";
+        String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
+        System.out.println("url = " + url);
+        // Construction de la requête
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-
-        System.out.println("URL : " + url);
-        System.out.println("Emp body : " + response.getBody());
 
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new Exception("Erreur lors de la récupération des employés : " + response.getStatusCode());
         }
 
+        // Traitement de la réponse JSON
         JsonNode root = objectMapper.readTree(response.getBody());
-        JsonNode data = root.get("data");
-
-
+        JsonNode dataNode = root.get("data");
 
         List<Employe> employes = new ArrayList<>();
-        for (JsonNode node : data) {
+        for (JsonNode node : dataNode) {
             Employe emp = new Employe();
-            emp.setName(node.path("name").asText());
-            emp.setEmployee_name(node.path("employee_name").asText());
-            emp.setGender(node.path("gender").asText());
-            emp.setDesignation(node.path("designation").asText());
-            emp.setDepartment(node.path("department").asText());
-            emp.setStatus(node.path("status").asText());
-            emp.setDate_of_joining(node.path("date_of_joining").asText());
-            emp.setCompany(node.path("company").asText());
-            emp.setBranch(node.path("branch").asText());
-            emp.setCell_number(node.path("cell_number").asText());
-            emp.setCompany_email(node.path("company_email").asText());
+            emp.setName(node.path("name").asText(null));
+            emp.setEmployee_name(node.path("employee_name").asText(null));
+            emp.setGender(node.path("gender").asText(null));
+            emp.setDesignation(node.path("designation").asText(null));
+            emp.setDepartment(node.path("department").asText(null));
+            emp.setStatus(node.path("status").asText(null));
+            emp.setDate_of_joining(node.path("date_of_joining").asText(null));
+            emp.setCompany(node.path("company").asText(null));
+            emp.setBranch(node.path("branch").asText(null));
+            emp.setCell_number(node.path("cell_number").asText(null));
+            emp.setCompany_email(node.path("company_email").asText(null));
             employes.add(emp);
         }
 
         return employes;
     }
+
 
 
 
