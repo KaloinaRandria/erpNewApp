@@ -3,6 +3,7 @@ package mg.working.controller.RH;
 import java.util.List;
 import java.util.Optional;
 
+import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,6 @@ public class EmployeController {
     private EmployeService employeService;
 
 
-
     @GetMapping("/list")
     public String listeEmployes(HttpSession session, Model model) {
         String sid = (String) session.getAttribute("sid");
@@ -31,7 +31,9 @@ public class EmployeController {
 
         try {
             List<Employe> employes = this.employeService.listerEmployes(sid);
+            List<Gender> genders = this.employeService.listerGenres(sid);
             model.addAttribute("employes", employes);
+            model.addAttribute("genders", genders);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors du chargement des employés : " + e.getMessage());
         }
@@ -54,7 +56,17 @@ public class EmployeController {
 
         try {
             List<Employe> employes = employeService.searchEmployes(sid, name, employeeName, gender, department, status);
+            List<Gender> genders = employeService.listerGenres(sid);
             model.addAttribute("employes", employes);
+            model.addAttribute("genders", genders);
+
+            // Conserver les valeurs du formulaire
+            model.addAttribute("nameValue", name.orElse(""));
+            model.addAttribute("employeeNameValue", employeeName.orElse(""));
+            model.addAttribute("genderValue", gender.orElse(""));
+            model.addAttribute("departmentValue", department.orElse(""));
+            model.addAttribute("statusValue", status.orElse(""));
+
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors de la recherche des employés : " + e.getMessage());
         }

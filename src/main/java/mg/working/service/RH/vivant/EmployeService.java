@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -179,6 +180,46 @@ public class EmployeService {
 
         return employes;
     }
+
+    public List<Gender> listerGenres(String sid) throws Exception {
+
+        // Préparation des en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Construction de l'URL
+        String url = erpnextUrl + "/api/resource/Gender";
+
+        // Construction de la requête
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des genres : " + response.getStatusCode());
+        }
+
+        // Traitement de la réponse JSON
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode dataNode = root.get("data");
+
+        List<Gender> genders = new ArrayList<>();
+        for (JsonNode node : dataNode) {
+            Gender gender = new Gender();
+            gender.setName(node.path("name").asText(null));
+            gender.setOwner(node.path("owner").asText(null));
+            gender.setCreation(node.path("creation").asText(null));
+            gender.setModified(node.path("modified").asText(null));
+            gender.setModified_by(node.path("modified_by").asText(null));
+            gender.setDocstatus(node.path("docstatus").asInt(0));
+            gender.setIdx(node.path("idx").asInt(0));
+            gender.setGender(node.path("gender").asText(null));
+            genders.add(gender);
+        }
+
+        return genders;
+    }
+
 
 
     public List<String> importerEmployesDepuisCSV(String sid, String fileName) throws Exception {

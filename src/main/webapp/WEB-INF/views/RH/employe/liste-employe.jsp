@@ -1,9 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.RH.vivant.Employe" %>
+<%@ page import="mg.working.model.RH.vivant.Gender" %>
 
 <%
     List<Employe> employes = (List<Employe>) request.getAttribute("employes");
+    List<Gender> genders =(List<Gender>) request.getAttribute("genders");
+
+    String nameValue = (String) request.getAttribute("nameValue");
+    String employeeNameValue = (String) request.getAttribute("employeeNameValue");
+    String genderValue = (String) request.getAttribute("genderValue");
+    String departmentValue = (String) request.getAttribute("departmentValue");
+    String statusValue = (String) request.getAttribute("statusValue");
 %>
 
 <!DOCTYPE html>
@@ -35,36 +43,44 @@
 
                             <div class="col-md-3">
                                 <label for="name" class="form-label">Matricule</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Ex: EMP-0001">
+                                <input type="text" class="form-control" id="name" name="name"
+                                       value="<%= nameValue != null ? nameValue : "" %>" placeholder="Ex: EMP-0001">
+
                             </div>
 
                             <div class="col-md-3">
                                 <label for="employeeName" class="form-label">Nom complet</label>
-                                <input type="text" class="form-control" id="employeeName" name="employeeName" placeholder="Ex: Rakoto Jean">
+                                <input type="text" class="form-control" id="employeeName" name="employeeName"
+                                       value="<%= employeeNameValue != null ? employeeNameValue : "" %>" placeholder="Ex: Rakoto Jean">
+
                             </div>
 
                             <div class="col-md-2">
                                 <label for="gender" class="form-label">Genre</label>
                                 <select id="gender" name="gender" class="form-select">
                                     <option value="">-- Tous --</option>
-                                    <option value="Male">Homme</option>
-                                    <option value="Female">Femme</option>
-                                    <option value="Other">Autre</option>
+                                    <% for (Gender gender : genders) {
+                                        String selected = gender.getName().equals(genderValue) ? "selected" : "";
+                                    %>
+                                    <option value="<%= gender.getName() %>" <%= selected %>><%= gender.getName() %></option>
+                                    <% } %>
                                 </select>
+
                             </div>
 
                             <div class="col-md-2">
                                 <label for="department" class="form-label">Département</label>
-                                <input type="text" class="form-control" id="department" name="department" placeholder="Ex: RH">
+                                <input type="text" class="form-control" id="department" name="department"
+                                       value="<%= departmentValue != null ? departmentValue : "" %>" placeholder="Ex: RH">
                             </div>
 
                             <div class="col-md-2">
                                 <label for="status" class="form-label">Statut</label>
                                 <select id="status" name="status" class="form-select">
                                     <option value="">-- Tous --</option>
-                                    <option value="Active">Actif</option>
-                                    <option value="Left">Parti</option>
-                                    <option value="Suspended">Suspendu</option>
+                                    <option value="Active" <%= "Active".equals(statusValue) ? "selected" : "" %>>Actif</option>
+                                    <option value="Left" <%= "Left".equals(statusValue) ? "selected" : "" %>>Parti</option>
+                                    <option value="Suspended" <%= "Suspended".equals(statusValue) ? "selected" : "" %>>Suspendu</option>
                                 </select>
                             </div>
 
