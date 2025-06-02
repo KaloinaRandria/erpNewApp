@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import mg.working.model.RH.organisation.Departement;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -220,6 +221,53 @@ public class EmployeService {
         return genders;
     }
 
+    public List<Departement> listerDepartements(String sid) throws Exception {
+
+        // Préparation des en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Construction de l'URL
+        String url = erpnextUrl + "/api/resource/Department";
+
+        // Construction de la requête
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des départements : " + response.getStatusCode());
+        }
+
+        // Traitement de la réponse JSON
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode dataNode = root.get("data");
+
+        List<Departement> departements = new ArrayList<>();
+        for (JsonNode node : dataNode) {
+            Departement dept = new Departement();
+            dept.setName(node.path("name").asText(null));
+            dept.setOwner(node.path("owner").asText(null));
+            dept.setCreation(node.path("creation").asText(null));
+            dept.setModified(node.path("modified").asText(null));
+            dept.setModified_by(node.path("modified_by").asText(null));
+            dept.setDocstatus(node.path("docstatus").asInt(0));
+            dept.setIdx(node.path("idx").asInt(0));
+            dept.setDepartment_name(node.path("department_name").asText(null));
+            dept.setParent_department(node.path("parent_department").asText(null));
+            dept.setCompany(node.path("company").asText(null));
+            dept.setIs_group(node.path("is_group").asInt(0));
+            dept.setDisabled(node.path("disabled").asInt(0));
+            dept.setLft(node.path("lft").asInt(0));
+            dept.setRgt(node.path("rgt").asInt(0));
+            dept.setOld_parent(node.path("old_parent").asText(null));
+            dept.setPayroll_cost_center(node.path("payroll_cost_center").asText(null));
+            dept.setLeave_block_list(node.path("leave_block_list").asText(null));
+            departements.add(dept);
+        }
+
+        return departements;
+    }
 
 
     public List<String> importerEmployesDepuisCSV(String sid, String fileName) throws Exception {
