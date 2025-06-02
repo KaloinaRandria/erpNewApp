@@ -5,12 +5,14 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import mg.working.model.RH.organisation.Departement;
+import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -79,6 +81,50 @@ public class EmployeService {
 
         return employes;
     }
+
+    public Employe getEmployeByName(String sid, String name) throws Exception {
+
+        // Préparer les en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Définir les champs à récupérer
+        String resource = "Employee";
+        String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
+
+        // URL pour accéder à un employé spécifique
+        String url = erpnextUrl + "/api/resource/" + resource + "/" + name + "?fields=" + fieldsParam;
+
+        System.out.println("URL : " + url);
+        // Construire la requête
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération de l'employé : " + response.getStatusCode());
+        }
+
+        // Traitement de la réponse JSON
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        Employe emp = new Employe();
+        emp.setName(data.path("name").asText(null));
+        emp.setEmployee_name(data.path("employee_name").asText(null));
+        emp.setGender(data.path("gender").asText(null));
+        emp.setDesignation(data.path("designation").asText(null));
+        emp.setDepartment(data.path("department").asText(null));
+        emp.setStatus(data.path("status").asText(null));
+        emp.setDate_of_joining(data.path("date_of_joining").asText(null));
+        emp.setCompany(data.path("company").asText(null));
+        emp.setBranch(data.path("branch").asText(null));
+        emp.setCell_number(data.path("cell_number").asText(null));
+        emp.setCompany_email(data.path("company_email").asText(null));
+
+        return emp;
+    }
+
 
 
     public List<Employe> searchEmployes(String sid,
@@ -287,6 +333,56 @@ public class EmployeService {
 
         return departements;
     }
+
+    public List<SalarySlip> getSalarySlipsByEmployee(String sid, String employeeId) throws Exception {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Encoder l'URL avec les bons paramètres
+        String fields = "[\"*\"]";
+        String filters = "[[\"employee\",\"=\",\"" + employeeId + "\"]]";
+
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters;
+        System.out.println("URL : " + url);
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des Salary Slips : " + response.getStatusCode());
+        }
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode dataArray = root.get("data");
+
+        List<SalarySlip> slips = new ArrayList<>();
+
+        for (JsonNode node : dataArray) {
+            SalarySlip slip = new SalarySlip();
+
+            slip.setName(node.path("name").asText(null));
+            slip.setEmployee(node.path("employee").asText(null));
+            slip.setEmployeeName(node.path("employee_name").asText(null));
+            slip.setCompany(node.path("company").asText(null));
+            slip.setDepartment(node.path("department").asText(null));
+            slip.setDesignation(node.path("designation").asText(null));
+            slip.setPostingDate(LocalDate.parse(node.path("posting_date").asText(null)));
+            slip.setCurrency(node.path("currency").asText(null));
+            slip.setStartDate(LocalDate.parse(node.path("start_date").asText(null)));
+            slip.setEndDate(LocalDate.parse(node.path("end_date").asText(null)));
+            slip.setGrossPay(node.path("gross_pay").asDouble(0.0));
+            slip.setTotalDeduction(node.path("total_deduction").asDouble(0.0));
+            slip.setNetPay(node.path("net_pay").asDouble(0.0));
+            slip.setStatus(node.path("status").asText(null));
+
+            slips.add(slip);
+        }
+
+        return slips;
+    }
+
 
 
     public List<String> importerEmployesDepuisCSV(String sid, String fileName) throws Exception {

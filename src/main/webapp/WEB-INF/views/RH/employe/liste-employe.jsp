@@ -148,6 +148,12 @@
                                 <td><%= emp.getStatus() %></td>
                                 <td><%= emp.getDate_of_joining() %></td>
                                 <td><%= emp.getCompany() %></td>
+                                <td>
+                                    <a href="${pageContext.request.contextPath}/rh/employe/fiche/<%= emp.getName() %>"
+                                       class="btn btn-sm btn-primary d-flex align-items-center gap-1">
+                                        <i class="bi bi-person-lines-fill"></i> Fiche
+                                    </a>
+                                </td>
 
                             </tr>
                             <%  }
