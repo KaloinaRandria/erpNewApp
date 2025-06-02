@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import mg.working.model.RH.organisation.Departement;
+import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -98,15 +99,15 @@ public class EmployeController {
 
         try {
             Employe employe = employeService.getEmployeByName(sid, name);
+            List<SalarySlip> salarySlips = employeService.getSalarySlipsByEmployee(sid , name);
             model.addAttribute("employe", employe);
+            model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur : " + e.getMessage());
         }
 
         return "RH/employe/fiche-employe";
     }
-
-
 
 }
 

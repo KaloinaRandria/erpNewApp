@@ -1,8 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="mg.working.model.RH.vivant.Employe" %>
+<%@ page import="java.util.List" %>
+<%@ page import="mg.working.model.RH.salaire.SalarySlip" %>
 
 <%
     Employe employe = (Employe) request.getAttribute("employe");
+    List<SalarySlip> salarySlips = (List<SalarySlip>) request.getAttribute("salarySlips");
 %>
 
 <!DOCTYPE html>
@@ -20,7 +23,7 @@
         <h1>Fiche Employé</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/dashboard">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}">Accueil</a></li>
                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/rh/employe/list">Employés</a></li>
                 <li class="breadcrumb-item active">Fiche</li>
             </ol>
@@ -93,6 +96,51 @@
                     </div>
                 </div>
             </div>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Bulletins de salaire</h5>
+
+                    <% if (salarySlips != null && !salarySlips.isEmpty()) { %>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Période</th>
+                                <th>Date de versement</th>
+                                <th>Entreprise</th>
+                                <th>Département</th>
+                                <th>Poste</th>
+                                <th>Brut (€)</th>
+                                <th>Déductions (€)</th>
+                                <th>Net à payer (€)</th>
+                                <th>Statut</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <% for (SalarySlip slip : salarySlips) { %>
+                            <tr>
+                                <td><%= slip.getStartDate() %> au <%= slip.getEndDate() %></td>
+                                <td><%= slip.getPostingDate() %></td>
+                                <td><%= slip.getCompany() %></td>
+                                <td><%= slip.getDepartment() %></td>
+                                <td><%= slip.getDesignation() %></td>
+                                <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
+                                <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
+                                <td><%= String.format("%.2f", slip.getNetPay()) %></td>
+                                <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
+                            </tr>
+                            <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } else { %>
+                    <div class="alert alert-warning mt-3">
+                        Aucun bulletin de salaire trouvé pour cet employé.
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
         </div>
     </section>
 
