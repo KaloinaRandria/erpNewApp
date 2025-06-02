@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpSession;
@@ -87,6 +88,24 @@ public class EmployeController {
 
         return "RH/employe/liste-employe";
     }
+
+    @GetMapping("/fiche/{name}")
+    public String afficherFicheEmploye(HttpSession session,
+                                       @PathVariable("name") String name,
+                                       Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            Employe employe = employeService.getEmployeByName(sid, name);
+            model.addAttribute("employe", employe);
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+        }
+
+        return "RH/employe/fiche-employe";
+    }
+
 
 
 }

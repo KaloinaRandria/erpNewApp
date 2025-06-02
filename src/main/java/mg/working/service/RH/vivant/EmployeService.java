@@ -80,6 +80,50 @@ public class EmployeService {
         return employes;
     }
 
+    public Employe getEmployeByName(String sid, String name) throws Exception {
+
+        // Préparer les en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Définir les champs à récupérer
+        String resource = "Employee";
+        String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
+
+        // URL pour accéder à un employé spécifique
+        String url = erpnextUrl + "/api/resource/" + resource + "/" + name + "?fields=" + fieldsParam;
+
+        System.out.println("URL : " + url);
+        // Construire la requête
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération de l'employé : " + response.getStatusCode());
+        }
+
+        // Traitement de la réponse JSON
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        Employe emp = new Employe();
+        emp.setName(data.path("name").asText(null));
+        emp.setEmployee_name(data.path("employee_name").asText(null));
+        emp.setGender(data.path("gender").asText(null));
+        emp.setDesignation(data.path("designation").asText(null));
+        emp.setDepartment(data.path("department").asText(null));
+        emp.setStatus(data.path("status").asText(null));
+        emp.setDate_of_joining(data.path("date_of_joining").asText(null));
+        emp.setCompany(data.path("company").asText(null));
+        emp.setBranch(data.path("branch").asText(null));
+        emp.setCell_number(data.path("cell_number").asText(null));
+        emp.setCompany_email(data.path("company_email").asText(null));
+
+        return emp;
+    }
+
+
 
     public List<Employe> searchEmployes(String sid,
                                         Optional<String> name,
