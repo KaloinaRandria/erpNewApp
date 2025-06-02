@@ -14,6 +14,8 @@
     String genderValue = (String) request.getAttribute("genderValue");
     String departmentValue = (String) request.getAttribute("departmentValue");
     String statusValue = (String) request.getAttribute("statusValue");
+    String startDateValue = (String) request.getAttribute("startDateValue");
+    String endDateValue = (String) request.getAttribute("endDateValue");
 %>
 
 <!DOCTYPE html>
@@ -93,6 +95,18 @@
                                     <option value="Left" <%= "Left".equals(statusValue) ? "selected" : "" %>>Parti</option>
                                     <option value="Suspended" <%= "Suspended".equals(statusValue) ? "selected" : "" %>>Suspendu</option>
                                 </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="startDate" class="form-label">Date d'embauche (début)</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate"
+                                       value="<%= startDateValue != null ? startDateValue : "" %>">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="endDate" class="form-label">Date d'embauche (fin)</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate"
+                                       value="<%= endDateValue != null ? endDateValue : "" %>">
                             </div>
 
                             <div class="col-md-12 text-end">

@@ -86,7 +86,9 @@ public class EmployeService {
                                         Optional<String> employeeName,
                                         Optional<String> gender,
                                         Optional<String> department,
-                                        Optional<String> status) throws Exception {
+                                        Optional<String> status,
+                                        Optional<String> startDate,
+                                        Optional<String> endDate) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Cookie", "sid=" + sid);
@@ -144,6 +146,22 @@ public class EmployeService {
             }
         });
 
+        // ✅ Ajout des filtres sur la date d'embauche (date_of_joining)
+        if (startDate.isPresent() && !startDate.get().trim().isEmpty()) {
+            ArrayNode filter = filtersArray.addArray();
+            filter.add("Employee");
+            filter.add("date_of_joining");
+            filter.add(">=");
+            filter.add(startDate.get());
+        }
+
+        if (endDate.isPresent() && !endDate.get().trim().isEmpty()) {
+            ArrayNode filter = filtersArray.addArray();
+            filter.add("Employee");
+            filter.add("date_of_joining");
+            filter.add("<=");
+            filter.add(endDate.get());
+        }
 
         String filters = mapper.writeValueAsString(filtersArray);
         String fields = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
@@ -181,6 +199,7 @@ public class EmployeService {
 
         return employes;
     }
+
 
     public List<Gender> listerGenres(String sid) throws Exception {
 
