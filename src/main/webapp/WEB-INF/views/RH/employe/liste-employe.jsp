@@ -2,10 +2,12 @@
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.RH.vivant.Employe" %>
 <%@ page import="mg.working.model.RH.vivant.Gender" %>
+<%@ page import="mg.working.model.RH.organisation.Departement" %>
 
 <%
     List<Employe> employes = (List<Employe>) request.getAttribute("employes");
     List<Gender> genders =(List<Gender>) request.getAttribute("genders");
+    List<Departement> departements = (List<Departement>) request.getAttribute("departements");
 
     String nameValue = (String) request.getAttribute("nameValue");
     String employeeNameValue = (String) request.getAttribute("employeeNameValue");
@@ -70,9 +72,18 @@
 
                             <div class="col-md-2">
                                 <label for="department" class="form-label">Département</label>
-                                <input type="text" class="form-control" id="department" name="department"
-                                       value="<%= departmentValue != null ? departmentValue : "" %>" placeholder="Ex: RH">
+                                <select id="department" name="department" class="form-select">
+                                    <option value="">-- Tous --</option>
+                                    <% for (Departement departement : departements) {
+                                        String name = departement.getName();
+                                        String selected = (departmentValue != null && departmentValue.equals(name)) ? "selected" : "";
+                                    %>
+                                    <option value="<%= name %>" <%= selected %>><%= name %></option>
+                                    <% } %>
+                                </select>
                             </div>
+
+
 
                             <div class="col-md-2">
                                 <label for="status" class="form-label">Statut</label>
@@ -101,14 +112,13 @@
                                 <th>Matricule</th>
                                 <th>Nom</th>
                                 <th>Genre</th>
-                                <th>Poste</th>
+                                <th>Designation</th>
                                 <th>Département</th>
                                 <th>Statut</th>
                                 <th>Date d'embauche</th>
                                 <th>Entreprise</th>
-                                <th>Succursale</th>
-                                <th>Téléphone</th>
-                                <th>Email</th>
+
+
                             </tr>
                             </thead>
                             <tbody>
@@ -124,9 +134,7 @@
                                 <td><%= emp.getStatus() %></td>
                                 <td><%= emp.getDate_of_joining() %></td>
                                 <td><%= emp.getCompany() %></td>
-                                <td><%= emp.getBranch() %></td>
-                                <td><%= emp.getCell_number() %></td>
-                                <td><%= emp.getCompany_email() %></td>
+
                             </tr>
                             <%  }
                                     } else { %>

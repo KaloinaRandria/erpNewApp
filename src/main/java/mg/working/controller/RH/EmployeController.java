@@ -3,6 +3,7 @@ package mg.working.controller.RH;
 import java.util.List;
 import java.util.Optional;
 
+import mg.working.model.RH.organisation.Departement;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,8 +33,11 @@ public class EmployeController {
         try {
             List<Employe> employes = this.employeService.listerEmployes(sid);
             List<Gender> genders = this.employeService.listerGenres(sid);
+            List<Departement> departements = this.employeService.listerDepartements(sid);
+
             model.addAttribute("employes", employes);
             model.addAttribute("genders", genders);
+            model.addAttribute("departements", departements);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors du chargement des employés : " + e.getMessage());
         }
@@ -57,8 +61,11 @@ public class EmployeController {
         try {
             List<Employe> employes = employeService.searchEmployes(sid, name, employeeName, gender, department, status);
             List<Gender> genders = employeService.listerGenres(sid);
+            List<Departement> departements = employeService.listerDepartements(sid);
+
             model.addAttribute("employes", employes);
             model.addAttribute("genders", genders);
+            model.addAttribute("departements", departements);
 
             // Conserver les valeurs du formulaire
             model.addAttribute("nameValue", name.orElse(""));
