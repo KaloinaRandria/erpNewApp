@@ -130,13 +130,14 @@
                                         </button>
                                     </form>
 
-                                    <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip/export" method="get" class="d-inline">
+                                    <form action="${pageContext.request.contextPath}/rh/export/pdf" method="get" class="d-inline">
                                         <input type="hidden" name="name" value="<%= slip.getName() %>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Exporter en PDF">
                                             <i class="bi bi-file-earmark-pdf-fill"></i>
                                         </button>
                                     </form>
                                 </td>
+
 
 
                             </tr>
