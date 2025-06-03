@@ -107,9 +107,6 @@
                             <tr>
                                 <th>Période</th>
                                 <th>Date de versement</th>
-                                <th>Entreprise</th>
-                                <th>Département</th>
-                                <th>Poste</th>
                                 <th>Brut (€)</th>
                                 <th>Déductions (€)</th>
                                 <th>Net à payer (€)</th>
@@ -121,9 +118,6 @@
                             <tr>
                                 <td><%= slip.getStartDate() %> au <%= slip.getEndDate() %></td>
                                 <td><%= slip.getPostingDate() %></td>
-                                <td><%= slip.getCompany() %></td>
-                                <td><%= slip.getDepartment() %></td>
-                                <td><%= slip.getDesignation() %></td>
                                 <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
                                 <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
                                 <td><%= String.format("%.2f", slip.getNetPay()) %></td>
