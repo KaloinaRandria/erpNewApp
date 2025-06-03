@@ -81,7 +81,6 @@ public class SalaireService {
         // Construire l'URL de la requête
         String resource = "Salary Slip";
         String url = erpnextUrl + "/api/resource/" + resource + "/" + name + "?fields=" + fieldsParam;
-        System.out.println("URL : " + url);
 
 
         // Construire la requête HTTP
