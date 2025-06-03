@@ -61,6 +61,7 @@ public class SalaireService {
             slip.setTotalDeduction(node.path("total_deduction").asDouble(0.0));
             slip.setNetPay(node.path("net_pay").asDouble(0.0));
             slip.setStatus(node.path("status").asText(null));
+            slip.setSalaryStructure(node.path("salary_structure").asText(null));
 
             slips.add(slip);
         }
@@ -110,6 +111,7 @@ public class SalaireService {
         slip.setTotalDeduction(data.path("total_deduction").asDouble(0.0));
         slip.setNetPay(data.path("net_pay").asDouble(0.0));
         slip.setStatus(data.path("status").asText(null));
+        slip.setSalaryStructure(data.path("salary_structure").asText(null));
 
         return slip;
     }
