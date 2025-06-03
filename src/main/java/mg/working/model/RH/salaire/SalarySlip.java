@@ -17,6 +17,7 @@ public class SalarySlip {
     private double totalDeduction;       // Ex: 5000.0
     private double netPay;               // Ex: -4000.0
     private String status;               // Ex: Draft
+    private String salaryStructure;
 
     // Getters and setters (ou @Data avec Lombok)
     public String getName() {
@@ -129,6 +130,14 @@ public class SalarySlip {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getSalaryStructure() {
+        return salaryStructure;
+    }
+
+    public void setSalaryStructure(String salaryStructure) {
+        this.salaryStructure = salaryStructure;
     }
 }
 
