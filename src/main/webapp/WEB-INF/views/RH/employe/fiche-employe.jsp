@@ -122,6 +122,15 @@
                                 <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
                                 <td><%= String.format("%.2f", slip.getNetPay()) %></td>
                                 <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
+                                <td>
+                                    <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip" method="get" class="d-inline">
+                                        <input type="hidden" name="name" value="<%= slip.getName() %>">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Aperçu
+                                        </button>
+                                    </form>
+                                </td>
+
                             </tr>
                             <% } %>
                             </tbody>

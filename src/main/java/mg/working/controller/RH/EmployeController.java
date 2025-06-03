@@ -6,6 +6,7 @@ import java.util.Optional;
 import mg.working.model.RH.organisation.Departement;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.vivant.Gender;
+import mg.working.service.RH.salaire.SalaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class EmployeController {
     @Autowired
     private EmployeService employeService;
+
+    @Autowired
+    private SalaireService salaireService;
 
 
     @GetMapping("/list")
@@ -99,7 +103,7 @@ public class EmployeController {
 
         try {
             Employe employe = employeService.getEmployeByName(sid, name);
-            List<SalarySlip> salarySlips = employeService.getSalarySlipsByEmployee(sid , name);
+            List<SalarySlip> salarySlips = salaireService.getSalarySlipsByEmployee(sid , name);
             model.addAttribute("employe", employe);
             model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
@@ -108,6 +112,7 @@ public class EmployeController {
 
         return "RH/employe/fiche-employe";
     }
+
 
 }
 
