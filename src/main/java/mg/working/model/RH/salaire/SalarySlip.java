@@ -1,6 +1,10 @@
 package mg.working.model.RH.salaire;
 
+import mg.working.model.RH.salaire.component.Deduction;
+import mg.working.model.RH.salaire.component.Earning;
+
 import java.time.LocalDate;
+import java.util.List;
 
 public class SalarySlip {
     private String name;                  // Ex: Sal Slip/HR-EMP-00003/00001
@@ -18,6 +22,9 @@ public class SalarySlip {
     private double netPay;               // Ex: -4000.0
     private String status;               // Ex: Draft
     private String salaryStructure;
+    private List<Earning> earnings;
+    private List<Deduction> deductions;
+
 
     // Getters and setters (ou @Data avec Lombok)
     public String getName() {
@@ -138,6 +145,22 @@ public class SalarySlip {
 
     public void setSalaryStructure(String salaryStructure) {
         this.salaryStructure = salaryStructure;
+    }
+
+    public List<Earning> getEarnings() {
+        return earnings;
+    }
+
+    public void setEarnings(List<Earning> earnings) {
+        this.earnings = earnings;
+    }
+
+    public List<Deduction> getDeductions() {
+        return deductions;
+    }
+
+    public void setDeductions(List<Deduction> deductions) {
+        this.deductions = deductions;
     }
 }
 

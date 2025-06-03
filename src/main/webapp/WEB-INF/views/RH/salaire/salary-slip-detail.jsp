@@ -1,8 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="mg.working.model.RH.salaire.SalarySlip" %>
+<%@ page import="mg.working.model.RH.salaire.component.Earning" %>
+<%@ page import="mg.working.model.RH.salaire.component.Deduction" %>
+<%@ page import="java.util.List" %>
 
 <%
     SalarySlip slip = (SalarySlip) request.getAttribute("salarySlip");
+    List<Earning> earnings = slip.getEarnings();
+    List<Deduction> deductions = slip.getDeductions();
 %>
 
 <!DOCTYPE html>
@@ -121,7 +126,68 @@
                     </div>
                 </div>
             </div>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Détails des composants</h5>
+                    <div class="row">
+                        <!-- Earnings -->
+                        <div class="col-md-6">
+                            <h6 class="text-success">Composants du Salaire (Earnings)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Composant</th>
+                                        <th>Montant (€)</th>
+                                        <th>Année à ce jour (€)</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <% if (earnings != null && !earnings.isEmpty()) {
+                                        for (Earning e : earnings) { %>
+                                    <tr>
+                                        <td><%= e.getSalary_component() %></td>
+                                        <td><%= String.format("%.2f", e.getAmount()) %></td>
+                                        <td><%= String.format("%.2f", e.getYear_to_date()) %></td>
+                                    </tr>
+                                    <% }} else { %>
+                                    <tr><td colspan="3" class="text-center">Aucun composant trouvé</td></tr>
+                                    <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
+                        <!-- Deductions -->
+                        <div class="col-md-6">
+                            <h6 class="text-danger">Déductions</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Composant</th>
+                                        <th>Montant (€)</th>
+                                        <th>Année à ce jour (€)</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <% if (deductions != null && !deductions.isEmpty()) {
+                                        for (Deduction d : deductions) { %>
+                                    <tr>
+                                        <td><%= d.getSalary_component() %></td>
+                                        <td><%= String.format("%.2f", d.getAmount()) %></td>
+                                        <td><%= String.format("%.2f", d.getYear_to_date()) %></td>
+                                    </tr>
+                                    <% }} else { %>
+                                    <tr><td colspan="3" class="text-center">Aucune déduction trouvée</td></tr>
+                                    <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </section>
