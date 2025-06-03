@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.RH.salaire.SalarySlip" %>
+<%@ page import="mg.working.service.RH.util.DateUtils" %>
 
 <%
     List<SalarySlip> salarySlips = (List<SalarySlip>) request.getAttribute("salarySlips");
@@ -44,13 +45,10 @@
                         <label for="month" class="form-label">Mois</label>
                         <select id="month" name="month" class="form-select">
                             <option value="">-- Tous --</option>
-                            <%
-                                String[] mois = {"01","02","03","04","05","06","07","08","09","10","11","12"};
-                                for (int i = 0; i < mois.length; i++) {
-                                    String val = mois[i];
-                                    boolean selected = (selectedMonth != null && selectedMonth == (i+1));
-                            %>
-                            <option value="<%= i+1 %>" <%= selected ? "selected" : "" %>>Mois <%= val %></option>
+                            <% for (int i = 1; i <= 12; i++) { %>
+                            <option value="<%= i %>" <%= selectedMonth != null && selectedMonth == i ? "selected" : "" %>>
+                                <%= DateUtils.getMoisFrancais()[i] %>
+                            </option>
                             <% } %>
                         </select>
                     </div>
@@ -84,7 +82,7 @@
                             <td><%= slip.getEmployeeName() %></td>
                             <td><%= slip.getDepartment() %></td>
                             <td><%= slip.getDesignation() %></td>
-                            <td><%= slip.getStartDate() %> au <%= slip.getEndDate() %></td>
+                            <td><%= DateUtils.getMoisFrancais()[slip.getStartDate().getMonthValue()] %> <%= slip.getStartDate().getYear() %></td>
                             <td><%= slip.getPostingDate() %></td>
                             <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
                             <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
