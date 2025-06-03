@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/rh/salaire")
 public class SalaireController {
@@ -35,4 +37,35 @@ public class SalaireController {
 
         return "RH/salaire/salary-slip-detail";
     }
+
+    @GetMapping("/salary-month")
+    public String getSalaryEmpByMonth(HttpSession session,
+                                      @RequestParam(name = "year", required = false) Integer year,
+                                      @RequestParam(name = "month", required = false) Integer month,
+                                      Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            List<SalarySlip> salarySlips;
+
+            if (year == null || month == null) {
+                // Si aucun filtre, on récupère tous les bulletins
+                salarySlips = salaireService.getAllSalarySlips(sid);
+            } else {
+                // Sinon, filtrer par mois/année
+                salarySlips = salaireService.getSalarySlipsByMonth(sid, year, month);
+                model.addAttribute("selectedYear", year);
+                model.addAttribute("selectedMonth", month);
+            }
+
+            model.addAttribute("salarySlips", salarySlips);
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la récupération des bulletins : " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return "RH/salaire/emp-salary-month";
+    }
+
 }

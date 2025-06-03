@@ -19,9 +19,14 @@
   <ul id="rh-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
     <li>
       <a href="/rh/employe/list">
-        <i class="bi bi-circle"></i><span>Liste des Employés</span>
+        <i class="bi bi-circle"></i><span>Liste des Employes</span>
       </a>
     </li>
+      <li>
+          <a href="/rh/salaire/salary-month">
+              <i class="bi bi-circle"></i><span>Employe Salaire par mois</span>
+          </a>
+      </li>
   </ul>
 </li>
 
