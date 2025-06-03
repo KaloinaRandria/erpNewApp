@@ -122,14 +122,22 @@
                                 <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
                                 <td><%= String.format("%.2f", slip.getNetPay()) %></td>
                                 <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
-                                <td>
+                                <td class="d-flex gap-2">
                                     <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip" method="get" class="d-inline">
                                         <input type="hidden" name="name" value="<%= slip.getName() %>">
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i> Aperçu
+                                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Aperçu">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </form>
+
+                                    <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip/export" method="get" class="d-inline">
+                                        <input type="hidden" name="name" value="<%= slip.getName() %>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Exporter en PDF">
+                                            <i class="bi bi-file-earmark-pdf-fill"></i>
                                         </button>
                                     </form>
                                 </td>
+
 
                             </tr>
                             <% } %>
