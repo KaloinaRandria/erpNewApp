@@ -104,6 +104,7 @@ public class EmployeController {
         try {
             Employe employe = employeService.getEmployeByName(sid, name);
             List<SalarySlip> salarySlips = salaireService.getSalarySlipsByEmployee(sid , name);
+
             model.addAttribute("employe", employe);
             model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
