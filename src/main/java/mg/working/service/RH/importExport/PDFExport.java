@@ -6,8 +6,7 @@ import mg.working.model.RH.salaire.SalarySlip;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+
 
 @Service
 public class PDFExport {
