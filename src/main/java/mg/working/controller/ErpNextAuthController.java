@@ -22,34 +22,39 @@ public class ErpNextAuthController {
                                  @RequestParam(name = "pwd") String password,
                                  Model model,
                                  HttpSession session) {
-        ErpNextSessionInfo sessionInfo = authService.loginAndGetSessionInfo(username, password);
+        try {
+            ErpNextSessionInfo sessionInfo = authService.loginAndGetSessionInfo(username, password);
 
-        session.setAttribute("sid", sessionInfo.getSid());
-
-        System.out.println("SID " + sessionInfo.getSid());
-
-        if (sessionInfo != null) {
-            model.addAttribute("sessionInfo", sessionInfo);
-//            return "redirect:/erpnext/suppliers";
-            return "redirect:/accueil";
-        } else {
-            model.addAttribute("error", "Erreur d'authentification ERPNext.");
+            // 🔐 Vérification avant d'accéder à getSid()
+            if (sessionInfo != null && sessionInfo.getSid() != null) {
+                session.setAttribute("sid", sessionInfo.getSid());
+                return "redirect:/accueil";
+            } else {
+                model.addAttribute("error", "Nom d'utilisateur ou mot de passe incorrect.");
+                return "login/login";
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur de connexion ERPNext : " + e.getMessage());
             return "login/login";
         }
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session, HttpServletResponse response) {
-        // Invalider la session
-        session.invalidate();
+        // Invalider la session Spring
+        if (session != null) {
+            session.invalidate();
+        }
 
-        // Supprimer le cookie 'sid'
-        Cookie cookie = new Cookie("sid", null);
-        cookie.setPath("/"); // Assurez-vous que le path est correct
-        cookie.setMaxAge(0); // Supprime immédiatement le cookie
+        // Supprimer le cookie 'sid' (session ERPNext)
+        Cookie cookie = new Cookie("sid", "");
+        cookie.setPath("/");           // Assurez-vous qu'il correspond bien à celui utilisé à la connexion
+        cookie.setMaxAge(0);           // Expire immédiatement
+        cookie.setHttpOnly(true);      // Meilleure sécurité
+        cookie.setSecure(false);       // À mettre à true si tu es en HTTPS
         response.addCookie(cookie);
 
-        // Redirection vers la page de login
+        // Rediriger vers la page de login
         return "redirect:/";
     }
 
