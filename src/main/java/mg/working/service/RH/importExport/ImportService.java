@@ -93,7 +93,12 @@ public class ImportService {
                 double salaireBase = Double.parseDouble(line[2].trim());
                 String salaire = line[3].trim();
 
-                EmployeeSalaryDTO dto = new EmployeeSalaryDTO(mois, refEmploye, salaireBase, salaire);
+                EmployeeSalaryDTO dto = new EmployeeSalaryDTO();
+                dto.setMois(mois);
+                dto.setRefEmploye(refEmploye);
+                dto.setSalaireBase(salaireBase);
+                dto.setSalaire(salaire);
+
                 result.add(dto);
             }
 

@@ -47,7 +47,7 @@ public class ImportController {
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", e.getMessage());
-            return "/error";
+            return "error/index";
         }
     }
 
@@ -64,7 +64,7 @@ public class ImportController {
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", e.getMessage());
-            return "error";
+            return "error.index";
         }
     }
 }

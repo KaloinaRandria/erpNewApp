@@ -13,7 +13,7 @@ public class EmployeeImportDTO {
     private String company;
 
 
-    public void parseDate(String dateString)throws Exception {
+    public static void parseDate(String dateString)throws Exception {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         formatter.setLenient(false);
         try {
