@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Controller
@@ -40,8 +42,7 @@ public class SalaireController {
 
     @GetMapping("/salary-month")
     public String getSalaryEmpByMonth(HttpSession session,
-                                      @RequestParam(name = "year", required = false) Integer year,
-                                      @RequestParam(name = "month", required = false) Integer month,
+                                      @RequestParam(name = "monthYear", required = false) String monthYear,
                                       Model model) {
         String sid = (String) session.getAttribute("sid");
         if (sid == null) return "redirect:/login";
@@ -49,14 +50,24 @@ public class SalaireController {
         try {
             List<SalarySlip> salarySlips;
 
-            if (year == null || month == null) {
-                // Si aucun filtre, on récupère tous les bulletins
-                salarySlips = salaireService.getAllSalarySlips(sid);
+            Integer selectedYear = null;
+            Integer selectedMonth = null;
+
+            if (monthYear != null && !monthYear.isEmpty()) {
+                try {
+                    YearMonth ym = YearMonth.parse(monthYear); // format yyyy-MM
+                    selectedYear = ym.getYear();
+                    selectedMonth = ym.getMonthValue();
+
+                    salarySlips = salaireService.getSalarySlipsByMonth(sid, selectedYear, selectedMonth);
+                    model.addAttribute("selectedYear", selectedYear);
+                    model.addAttribute("selectedMonth", selectedMonth);
+                } catch (DateTimeParseException e) {
+                    model.addAttribute("error", "Le format de la date est invalide.");
+                    salarySlips = salaireService.getAllSalarySlips(sid);
+                }
             } else {
-                // Sinon, filtrer par mois/année
-                salarySlips = salaireService.getSalarySlipsByMonth(sid, year, month);
-                model.addAttribute("selectedYear", year);
-                model.addAttribute("selectedMonth", month);
+                salarySlips = salaireService.getAllSalarySlips(sid);
             }
 
             model.addAttribute("salarySlips", salarySlips);

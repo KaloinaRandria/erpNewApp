@@ -42,7 +42,7 @@
                                 <i class="bi bi-person-fill"></i>
                             </div>
                             <h4 class="mt-3"><%= employe.getEmployee_name() %></h4>
-                            <p class="text-muted"><%= employe.getDesignation() %> - <%= employe.getDepartment() %></p>
+<%--                            <p class="text-muted"><%= employe.getDesignation() %> - <%= employe.getDepartment() %></p>--%>
                         </div>
 
                         <hr>
@@ -72,20 +72,20 @@
                             <div class="col-sm-8"><%= employe.getCompany() %></div>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold">Agence :</div>
-                            <div class="col-sm-8"><%= employe.getBranch() %></div>
-                        </div>
+<%--                        <div class="row mb-3">--%>
+<%--                            <div class="col-sm-4 fw-bold">Agence :</div>--%>
+<%--                            <div class="col-sm-8"><%= employe.getBranch() %></div>--%>
+<%--                        </div>--%>
 
-                        <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold">Téléphone :</div>
-                            <div class="col-sm-8"><%= employe.getCell_number() %></div>
-                        </div>
+<%--                        <div class="row mb-3">--%>
+<%--                            <div class="col-sm-4 fw-bold">Téléphone :</div>--%>
+<%--                            <div class="col-sm-8"><%= employe.getCell_number() %></div>--%>
+<%--                        </div>--%>
 
-                        <div class="row mb-3">
-                            <div class="col-sm-4 fw-bold">Email professionnel :</div>
-                            <div class="col-sm-8"><%= employe.getCompany_email() %></div>
-                        </div>
+<%--                        <div class="row mb-3">--%>
+<%--                            <div class="col-sm-4 fw-bold">Email professionnel :</div>--%>
+<%--                            <div class="col-sm-8"><%= employe.getCompany_email() %></div>--%>
+<%--                        </div>--%>
 
                         <div class="text-end mt-4">
                             <a href="${pageContext.request.contextPath}/rh/employe/list" class="btn btn-secondary">

@@ -39,26 +39,19 @@
                 <!-- Filtre -->
                 <form method="get" action="${pageContext.request.contextPath}/rh/salaire/salary-month" class="row g-3 mb-4">
                     <div class="col-md-3">
-                        <label for="year" class="form-label">Année</label>
-                        <input type="number" min="2000" max="2100" id="year" name="year" class="form-control"
-                               value="<%= selectedYear != null ? selectedYear : "" %>" placeholder="Ex: 2025">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="month" class="form-label">Mois</label>
-                        <select id="month" name="month" class="form-select">
-                            <option value="">-- Tous --</option>
-                            <% for (int i = 1; i <= 12; i++) { %>
-                            <option value="<%= i %>" <%= selectedMonth != null && selectedMonth == i ? "selected" : "" %>>
-                                <%= DateUtils.getMoisFrancais()[i] %>
-                            </option>
-                            <% } %>
-                        </select>
+                        <label for="monthYear" class="form-label">Mois</label>
+                        <input type="month" class="form-control" id="monthYear" name="monthYear"
+                               value="<% if (selectedYear != null && selectedMonth != null) {
+                           String monthFormatted = String.format("%02d", selectedMonth);
+                           out.print(selectedYear + "-" + monthFormatted);
+                       } %>">
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-success">Filtrer</button>
                         <a href="${pageContext.request.contextPath}/rh/salaire/salary-month" class="btn btn-secondary ms-2">Réinitialiser</a>
                     </div>
                 </form>
+
 
                 <!-- Tableau -->
                 <% if (salarySlips != null && !salarySlips.isEmpty()) { %>
