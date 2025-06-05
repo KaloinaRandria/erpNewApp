@@ -72,30 +72,30 @@
 
                             </div>
 
-                            <div class="col-md-2">
-                                <label for="department" class="form-label">Département</label>
-                                <select id="department" name="department" class="form-select">
-                                    <option value="">-- Tous --</option>
-                                    <% for (Departement departement : departements) {
-                                        String name = departement.getName();
-                                        String selected = (departmentValue != null && departmentValue.equals(name)) ? "selected" : "";
-                                    %>
-                                    <option value="<%= name %>" <%= selected %>><%= name %></option>
-                                    <% } %>
-                                </select>
-                            </div>
+<%--                            <div class="col-md-2">--%>
+<%--                                <label for="department" class="form-label">Département</label>--%>
+<%--                                <select id="department" name="department" class="form-select">--%>
+<%--                                    <option value="">-- Tous --</option>--%>
+<%--                                    <% for (Departement departement : departements) {--%>
+<%--                                        String name = departement.getName();--%>
+<%--                                        String selected = (departmentValue != null && departmentValue.equals(name)) ? "selected" : "";--%>
+<%--                                    %>--%>
+<%--                                    <option value="<%= name %>" <%= selected %>><%= name %></option>--%>
+<%--                                    <% } %>--%>
+<%--                                </select>--%>
+<%--                            </div>--%>
 
 
 
-                            <div class="col-md-2">
-                                <label for="status" class="form-label">Statut</label>
-                                <select id="status" name="status" class="form-select">
-                                    <option value="">-- Tous --</option>
-                                    <option value="Active" <%= "Active".equals(statusValue) ? "selected" : "" %>>Actif</option>
-                                    <option value="Left" <%= "Left".equals(statusValue) ? "selected" : "" %>>Parti</option>
-                                    <option value="Suspended" <%= "Suspended".equals(statusValue) ? "selected" : "" %>>Suspendu</option>
-                                </select>
-                            </div>
+<%--                            <div class="col-md-2">--%>
+<%--                                <label for="status" class="form-label">Statut</label>--%>
+<%--                                <select id="status" name="status" class="form-select">--%>
+<%--                                    <option value="">-- Tous --</option>--%>
+<%--                                    <option value="Active" <%= "Active".equals(statusValue) ? "selected" : "" %>>Actif</option>--%>
+<%--                                    <option value="Left" <%= "Left".equals(statusValue) ? "selected" : "" %>>Parti</option>--%>
+<%--                                    <option value="Suspended" <%= "Suspended".equals(statusValue) ? "selected" : "" %>>Suspendu</option>--%>
+<%--                                </select>--%>
+<%--                            </div>--%>
 
                             <div class="col-md-2">
                                 <label for="startDate" class="form-label">Date d'embauche (début)</label>
@@ -126,9 +126,9 @@
                                 <th>Matricule</th>
                                 <th>Nom</th>
                                 <th>Genre</th>
-                                <th>Designation</th>
-                                <th>Département</th>
-                                <th>Statut</th>
+<%--                                <th>Designation</th>--%>
+<%--                                <th>Département</th>--%>
+<%--                                <th>Statut</th>--%>
                                 <th>Date d'embauche</th>
                                 <th>Entreprise</th>
 
@@ -143,9 +143,9 @@
                                 <td><%= emp.getName() %></td>
                                 <td><%= emp.getEmployee_name() %></td>
                                 <td><%= emp.getGender() %></td>
-                                <td><%= emp.getDesignation() %></td>
-                                <td><%= emp.getDepartment() %></td>
-                                <td><%= emp.getStatus() %></td>
+<%--                                <td><%= emp.getDesignation() %></td>--%>
+<%--                                <td><%= emp.getDepartment() %></td>--%>
+<%--                                <td><%= emp.getStatus() %></td>--%>
                                 <td><%= emp.getDate_of_joining() %></td>
                                 <td><%= emp.getCompany() %></td>
                                 <td>
