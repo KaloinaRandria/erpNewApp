@@ -45,8 +45,13 @@
                                     </div>
 
                                     <div class="col-12">
-                                        <label for="mdp" class="form-label">mot de passe</label>
-                                        <input type="password" name="pwd" class="form-control" id="mdp" required>
+                                    <label for="mdp" class="form-label">Mot de passe</label>
+                                        <div class="input-group">
+                                            <input type="password" name="pwd" class="form-control" id="mdp" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                                Afficher
+                                            </button>
+                                        </div>
                                         <div class="invalid-feedback">Entrer votre mot de passe</div>
                                     </div>
 
@@ -71,6 +76,14 @@
 
 <%@include file="../static/footer.jsp"%>
 
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('mdp');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.textContent = type === 'password' ? 'Afficher' : 'Masquer'; // Optionnel : changer l'icône
+    });
+</script>
 </body>
 
 </html>

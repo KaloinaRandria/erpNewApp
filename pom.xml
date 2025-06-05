@@ -82,6 +82,19 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>4.0.3</version> <!-- Ou la version la plus récente -->
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.7.1</version> <!-- ou la dernière version disponible -->
+        </dependency>
+
+
     </dependencies>
 
     <build>
