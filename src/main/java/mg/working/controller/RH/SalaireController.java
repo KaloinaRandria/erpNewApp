@@ -33,8 +33,9 @@ public class SalaireController {
             model.addAttribute("salarySlip", salarySlip);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
-//            model.addAttribute("error", "Erreur : " + e.getMessage());
+//            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
         }
 
         return "RH/salaire/salary-slip-detail";
@@ -73,7 +74,8 @@ public class SalaireController {
             model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors de la récupération des bulletins : " + e.getMessage());
-            e.printStackTrace();
+            return "error/index";
+//            e.printStackTrace();
         }
 
         return "RH/salaire/emp-salary-month";

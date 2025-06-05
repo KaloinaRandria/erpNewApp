@@ -7,20 +7,36 @@ public class EmployeeSalaryDTO {
     private String salaire;
 
     // Constructeur
-    public EmployeeSalaryDTO(String mois, int refEmploye, double salaireBase, String salaire) {
-        this.mois = mois;
-        this.refEmploye = refEmploye;
-        this.salaireBase = salaireBase;
-        this.salaire = salaire;
+    public EmployeeSalaryDTO(String mois, int refEmploye, double salaireBase, String salaire) throws Exception {
+        try {
+            EmployeeImportDTO.parseDate(mois);
+            this.mois = mois;
+            this.refEmploye = refEmploye;
+            this.salaireBase = salaireBase;
+            this.salaire = salaire;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+
     }
+    public EmployeeSalaryDTO(){}
 
     // Getters et Setters
     public String getMois() {
         return mois;
     }
 
-    public void setMois(String mois) {
-        this.mois = mois;
+    public void setMois(String mois) throws Exception {
+        try {
+            EmployeeImportDTO.parseDate(mois);
+            this.mois = mois;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
     }
 
     public int getRefEmploye() {

@@ -46,6 +46,7 @@ public class EmployeController {
             model.addAttribute("departements", departements);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors du chargement des employés : " + e.getMessage());
+            return "error/index";
         }
 
         return "RH/employe/liste-employe";
@@ -89,6 +90,7 @@ public class EmployeController {
 
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors de la recherche des employés : " + e.getMessage());
+            return "error/index";
         }
 
         return "RH/employe/liste-employe";
@@ -109,6 +111,7 @@ public class EmployeController {
             model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
         }
 
         return "RH/employe/fiche-employe";
