@@ -28,8 +28,12 @@ public class ExportController {
             response.sendRedirect("/login");
             return;
         }
+        try {
+            SalarySlip slip = salaireService.getSalarySlipByName(sid, name);
+            pdfExport.exporterBulletinSalaire(response, slip);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        SalarySlip slip = salaireService.getSalarySlipByName(sid, name);
-        pdfExport.exporterBulletinSalaire(response, slip);
     }
 }
