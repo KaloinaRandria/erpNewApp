@@ -18,17 +18,22 @@
   </a>
   <ul id="rh-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
     <li>
-      <a href="/rh/employe/list">
+      <a href="${pageContext.request.contextPath}/rh/employe/list">
         <i class="bi bi-circle"></i><span>Liste des Employes</span>
       </a>
     </li>
       <li>
-          <a href="/rh/salaire/salary-month">
+          <a href="${pageContext.request.contextPath}/rh/salaire/salary-month">
               <i class="bi bi-circle"></i><span>Employe Salaire par mois</span>
           </a>
       </li>
+      <li>
+          <a href="">
+              <i class="bi bi-circle"></i><span>Statistiques</span>
+          </a>
+      </li>
   </ul>
-</li>
+
 
 
 
