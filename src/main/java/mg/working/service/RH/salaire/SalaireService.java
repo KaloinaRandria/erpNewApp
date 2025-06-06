@@ -30,7 +30,7 @@ public class SalaireService {
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]"; // seul le name suffit
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&limit_page_length=2500"; // seul le name suffit
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -60,7 +60,7 @@ public class SalaireService {
 
         String fields = "[\"name\"]"; // Récupère juste le nom (clé primaire)
         String filters = "[[\"employee\",\"=\",\"" + employeeId + "\"]]";
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters;
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters + "&limit_page_length=2500";
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -90,7 +90,7 @@ public class SalaireService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Définir les champs à récupérer (ajuste si nécessaire)
-        String fieldsParam = "[\"name\",\"employee\",\"employee_name\",\"company\",\"department\",\"designation\",\"posting_date\",\"start_date\",\"end_date\",\"gross_pay\",\"total_deduction\",\"net_pay\",\"status\"]";
+        String fieldsParam = "[\"name\",\"employee\",\"employee_name\",\"company\",\"department\",\"designation\",\"posting_date\",\"start_date\",\"end_date\",\"gross_pay\",\"total_deduction\",\"net_pay\",\"status\"]&limit_page_length=2500";
 
         // Construire l'URL de la requête
         String resource = "Salary Slip";
@@ -165,7 +165,7 @@ public class SalaireService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        String filters = String.format("[[\"Salary Slip\", \"start_date\", \">=\", \"%s\"], [\"Salary Slip\", \"end_date\", \"<=\", \"%s\"]]",
+        String filters = String.format("[[\"Salary Slip\", \"start_date\", \">=\", \"%s\"], [\"Salary Slip\", \"end_date\", \"<=\", \"%s\"]]&limit_page_length=2500",
                 startDate, endDate);
 
         String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&filters=" + filters;
