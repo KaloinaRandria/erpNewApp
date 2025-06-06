@@ -1,14 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
-<%@ page import="mg.working.model.RH.salaire.SalarySlip" %>
-<%@ page import="mg.working.service.RH.util.DateUtils" %>
+<%@ page import="mg.working.model.RH.salaire.StatistiqueSalaire" %>
 <%@ page import="mg.working.model.RH.salaire.component.Deduction" %>
 <%@ page import="mg.working.model.RH.salaire.component.Earning" %>
 
 <%
-    List<SalarySlip> salarySlips = (List<SalarySlip>) request.getAttribute("salarySlips");
+    // La liste et l'année sélectionnée sont fournies par le contrôleur.
+    List<StatistiqueSalaire> statistiqueSalaires = (List<StatistiqueSalaire>) request.getAttribute("stats");
     Integer selectedYear = (Integer) request.getAttribute("selectedYear");
-    Integer selectedMonth = (Integer) request.getAttribute("selectedMonth");
 %>
 
 <!DOCTYPE html>
@@ -21,9 +20,8 @@
 <%@ include file="../../static/sidebar.jsp" %>
 
 <main id="main" class="main">
-
     <div class="pagetitle">
-        <h1>Bulletins de salaire par mois</h1>
+        <h1>Statistiques Salaires par Mois</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}">Accueil</a></li>
@@ -36,65 +34,58 @@
         <div class="card">
             <div class="card-body pt-4">
 
-                <!-- Filtre -->
-                <form method="get" action="${pageContext.request.contextPath}/rh/salaire/salary-month" class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <label for="monthYear" class="form-label">Mois</label>
-                        <input type="month" class="form-control" id="monthYear" name="monthYear"
-                               value="<% if (selectedYear != null && selectedMonth != null) {
-                           String monthFormatted = String.format("%02d", selectedMonth);
-                           out.print(selectedYear + "-" + monthFormatted);
-                       } %>">
+                <!-- Filtre par année -->
+                <form method="get" action="${pageContext.request.contextPath}/rh/salaire/statistique-salaire"
+                      class="row g-3 mb-4 align-items-end">
+                    <div class="col-md-2">
+                        <label for="year" class="form-label">Année</label>
+                        <input type="number"
+                               id="year"
+                               name="year"
+                               class="form-control"
+                               min="2000"
+                               max="2100"
+                               value="<%= (selectedYear != null) ? selectedYear : "" %>"
+                        >
                     </div>
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-success">Filtrer</button>
-                        <a href="${pageContext.request.contextPath}/rh/salaire/salary-month" class="btn btn-secondary ms-2">Réinitialiser</a>
+                        <a href="${pageContext.request.contextPath}/rh/salaire/statistique-salaire"
+                           class="btn btn-secondary ms-2">Réinitialiser</a>
                     </div>
                 </form>
 
-
-                <!-- Tableau -->
-                <% if (salarySlips != null && !salarySlips.isEmpty()) { %>
+                <!-- Tableau des statistiques -->
+                <% if (statistiqueSalaires != null && !statistiqueSalaires.isEmpty()) { %>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead class="table-light">
                         <tr>
                             <th>Mois</th>
-                            <th>total earning detail</th>
-                            <th>total deduction detail</th>
-                            <th>Total Earning</th>
-                            <th>Total Déductions</th>
-                            <th>Net à payer</th>
-                            <th>Actions</th>
+                            <th>Détail Earning</th>
+                            <th>Détail Deduction</th>
+                            <th>Total Earning (€)</th>
+                            <th>Total Deduction (€)</th>
+                            <th>Net à Payer (€)</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (SalarySlip slip : salarySlips) { %>
+                        <% for (StatistiqueSalaire stat : statistiqueSalaires) { %>
                         <tr>
-                            <td><%= slip.getEmployeeName() %></td>
-                            <td><%= DateUtils.getMoisFrancais()[slip.getStartDate().getMonthValue()] %> <%= slip.getStartDate().getYear() %></td>
+                            <td><strong><%= stat.getMonth() %></strong></td>
+
+                            <!-- Détail Earning -->
                             <td>
-                                <% if (slip.getEarnings() != null && !slip.getEarnings().isEmpty()) { %>
+                                <% if (stat.getEarnings() != null && !stat.getEarnings().isEmpty()) { %>
                                 <ul class="list-unstyled mb-0">
-                                    <% for (Earning earning : slip.getEarnings()) { %>
+                                    <% for (Earning earning : stat.getEarnings()) { %>
                                     <li>
-                                        <span class="text-primary fw-bold"><%= earning.getSalary_component() %></span> :
-                                        <span class="badge bg-light text-dark"><%= String.format("%.2f", earning.getAmount()) %> €</span>
-                                    </li>
-                                    <% } %>
-                                </ul>
-                                <% } else { %>
-                                <span class="text-muted">-</span>
-                                <% } %>
-                            </td>
-                            <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
-                            <td>
-                                <% if (slip.getDeductions() != null && !slip.getDeductions().isEmpty()) { %>
-                                <ul class="list-unstyled mb-0">
-                                    <% for (Deduction deduction : slip.getDeductions()) { %>
-                                    <li>
-                                        <span class="text-danger fw-bold"><%= deduction.getSalary_component() %></span> :
-                                        <span class="badge bg-light text-dark"><%= String.format("%.2f", deduction.getAmount()) %> €</span>
+                                                            <span class="text-primary fw-bold">
+                                                                <%= earning.getSalary_component() %>
+                                                            </span> :
+                                        <span class="badge bg-light text-dark">
+                                                                <%= String.format("%.2f", earning.getAmount()) %> €
+                                                            </span>
                                     </li>
                                     <% } %>
                                 </ul>
@@ -103,24 +94,29 @@
                                 <% } %>
                             </td>
 
-
-                            <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
-                            <td><strong><%= String.format("%.2f", slip.getNetPay()) %></strong></td>
-                            <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
-                            <td class="d-flex gap-2">
-                                <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip" method="get" class="d-inline">
-                                    <input type="hidden" name="name" value="<%= slip.getName() %>">
-                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="Aperçu">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </form>
-                                <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip/export" method="get" class="d-inline">
-                                    <input type="hidden" name="name" value="<%= slip.getName() %>">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Exporter PDF">
-                                        <i class="bi bi-file-earmark-pdf-fill"></i>
-                                    </button>
-                                </form>
+                            <!-- Détail Deduction -->
+                            <td>
+                                <% if (stat.getDeductions() != null && !stat.getDeductions().isEmpty()) { %>
+                                <ul class="list-unstyled mb-0">
+                                    <% for (Deduction deduction : stat.getDeductions()) { %>
+                                    <li>
+                                                            <span class="text-danger fw-bold">
+                                                                <%= deduction.getSalary_component() %>
+                                                            </span> :
+                                        <span class="badge bg-light text-dark">
+                                                                <%= String.format("%.2f", deduction.getAmount()) %> €
+                                                            </span>
+                                    </li>
+                                    <% } %>
+                                </ul>
+                                <% } else { %>
+                                <span class="text-muted">-</span>
+                                <% } %>
                             </td>
+
+                            <td><%= String.format("%.2f", stat.getGrossTotal()) %></td>
+                            <td><%= String.format("%.2f", stat.getDeductionTotal()) %></td>
+                            <td><strong><%= String.format("%.2f", stat.getNetTotal()) %></strong></td>
                         </tr>
                         <% } %>
                         </tbody>
@@ -128,7 +124,7 @@
                 </div>
                 <% } else { %>
                 <div class="alert alert-warning mt-3">
-                    Aucun bulletin trouvé pour les critères sélectionnés.
+                    Aucune donnée statistique disponible pour l'année sélectionnée.
                 </div>
                 <% } %>
 

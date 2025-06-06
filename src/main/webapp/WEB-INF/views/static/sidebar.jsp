@@ -28,7 +28,7 @@
           </a>
       </li>
       <li>
-          <a href="">
+          <a href="${pageContext.request.contextPath}/rh/salaire/statistique-salaire">
               <i class="bi bi-circle"></i><span>Statistiques</span>
           </a>
       </li>

@@ -2,6 +2,7 @@ package mg.working.controller.RH;
 
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.service.RH.salaire.SalaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,9 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/rh/salaire")
@@ -81,4 +84,39 @@ public class SalaireController {
         return "RH/salaire/emp-salary-month";
     }
 
+    @GetMapping("/statistique-salaire")
+    public String afficherStatistiquesSalaire(
+            HttpSession session,
+            @RequestParam(name = "year", required = false) Integer year,
+            Model model) {
+
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Si aucun 'year' fourni, on utilise l'année courante
+            int selectedYear = (year != null) ? year : LocalDate.now().getYear();
+            model.addAttribute("selectedYear", selectedYear);
+
+            // Récupérer tous les bulletins
+            List<SalarySlip> allSlips = salaireService.getAllSalarySlips(sid);
+
+            // Filtrer pour ne conserver que ceux de l'année sélectionnée
+            List<SalarySlip> slipsFiltered = allSlips.stream()
+                    .filter(slip -> slip.getStartDate().getYear() == selectedYear)
+                    .collect(Collectors.toList());
+
+            // Regroupement par mois
+            List<StatistiqueSalaire> stats = salaireService.groupSalarySlipsByMonth(slipsFiltered);
+
+            model.addAttribute("stats", stats);
+            return "RH/statistique/salaire-stat";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors du chargement des statistiques : " + e.getMessage());
+            return "error/index";
+        }
+    }
 }
