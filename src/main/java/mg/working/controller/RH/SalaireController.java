@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -82,6 +83,42 @@ public class SalaireController {
         }
 
         return "RH/salaire/emp-salary-month";
+    }
+
+    @GetMapping("/statistique-salaire/{monthYear}")
+    public String getSalarySlipsByMonthNoFilter(HttpSession session,
+                                                @PathVariable(name = "monthYear") String monthYear,
+                                                Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            List<SalarySlip> salarySlips;
+
+            Integer selectedYear = null;
+            Integer selectedMonth = null;
+
+            if (monthYear != null && !monthYear.isEmpty()) {
+                try {
+                    YearMonth ym = YearMonth.parse(monthYear); // format yyyy-MM
+                    selectedYear = ym.getYear();
+                    selectedMonth = ym.getMonthValue();
+
+                    salarySlips = salaireService.getSalarySlipsByMonth(sid, selectedYear, selectedMonth);
+                } catch (DateTimeParseException e) {
+                    model.addAttribute("error", "Le format de la date est invalide.");
+                    salarySlips = salaireService.getAllSalarySlips(sid);
+                }
+            } else {
+                salarySlips = salaireService.getAllSalarySlips(sid);
+            }
+
+            model.addAttribute("salarySlips", salarySlips);
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la récupération des bulletins : " + e.getMessage());
+            return "error/index";
+        }
+        return "RH/statistique/salaire-stat-details";
     }
 
     @GetMapping("/statistique-salaire")

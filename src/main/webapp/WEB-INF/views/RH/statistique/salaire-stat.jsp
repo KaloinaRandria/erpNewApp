@@ -118,7 +118,12 @@
 
                             <td><%= String.format("%.2f", stat.getGrossTotal()) %></td>
                             <td><%= String.format("%.2f", stat.getDeductionTotal()) %></td>
-                            <td><strong><%= String.format("%.2f", stat.getNetTotal()) %></strong></td>
+                            <td>
+                                <a href="${pageContext.request.contextPath}/rh/salaire/statistique-salaire/<%= stat.getMonth() %>">
+                                    <strong><%= String.format("%.2f", stat.getNetTotal()) %></strong>
+                                </a>
+                            </td>
+
                         </tr>
                         <% } %>
                         </tbody>
