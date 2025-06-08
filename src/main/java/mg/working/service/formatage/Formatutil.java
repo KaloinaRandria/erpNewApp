@@ -14,4 +14,13 @@ public class Formatutil {
         DecimalFormat format = new DecimalFormat("#,##0.00", symbols);
         return format.format(montant);
     }
+
+    public static String refactorAmountFormat(String column) {
+        column = column.replace("\'" , "");
+        column = column.replace(".", "");
+        column = column.replace(",", ".");
+        column = column.replace(" ", "");
+
+        return column;
+    }
 }

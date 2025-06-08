@@ -3,6 +3,7 @@ package mg.working.service.RH.salaire;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +11,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SalaireService {
@@ -22,12 +23,14 @@ public class SalaireService {
     @Value("${erpnext.url}")
     private String erpnextUrl;
 
+    private static final SimpleDateFormat monthFormatter = new SimpleDateFormat("yyyy-MM");
+
     public List<SalarySlip> getAllSalarySlips(String sid) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]"; // seul le name suffit
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&limit_page_length=2500"; // seul le name suffit
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -57,7 +60,7 @@ public class SalaireService {
 
         String fields = "[\"name\"]"; // Récupère juste le nom (clé primaire)
         String filters = "[[\"employee\",\"=\",\"" + employeeId + "\"]]";
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters;
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters + "&limit_page_length=2500";
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -87,7 +90,7 @@ public class SalaireService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Définir les champs à récupérer (ajuste si nécessaire)
-        String fieldsParam = "[\"name\",\"employee\",\"employee_name\",\"company\",\"department\",\"designation\",\"posting_date\",\"start_date\",\"end_date\",\"gross_pay\",\"total_deduction\",\"net_pay\",\"status\"]";
+        String fieldsParam = "[\"name\",\"employee\",\"employee_name\",\"company\",\"department\",\"designation\",\"posting_date\",\"start_date\",\"end_date\",\"gross_pay\",\"total_deduction\",\"net_pay\",\"status\"]&limit_page_length=2500";
 
         // Construire l'URL de la requête
         String resource = "Salary Slip";
@@ -162,7 +165,7 @@ public class SalaireService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        String filters = String.format("[[\"Salary Slip\", \"start_date\", \">=\", \"%s\"], [\"Salary Slip\", \"end_date\", \"<=\", \"%s\"]]",
+        String filters = String.format("[[\"Salary Slip\", \"start_date\", \">=\", \"%s\"], [\"Salary Slip\", \"end_date\", \"<=\", \"%s\"]]&limit_page_length=2500",
                 startDate, endDate);
 
         String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&filters=" + filters;
@@ -187,4 +190,75 @@ public class SalaireService {
         return slips;
     }
 
+    public List<StatistiqueSalaire> groupSalarySlipsByMonth(List<SalarySlip> slips) {
+        Map<String, StatistiqueSalaire> groupedStats = new HashMap<>();
+
+        for (SalarySlip slip : slips) {
+            String month = monthFormatter.format(slip.getStartDateString());
+
+            StatistiqueSalaire stat;
+
+            // Vérifie si le mois existe déjà
+            if (groupedStats.containsKey(month)) {
+                stat = groupedStats.get(month);
+            } else {
+                stat = new StatistiqueSalaire();
+                stat.setMonth(month);
+                stat.setEarnings(new ArrayList<>());
+                stat.setDeductions(new ArrayList<>());
+                stat.setGrossTotal(0);
+                stat.setNetTotal(0);
+                stat.setDeductionTotal(0);
+                groupedStats.put(month, stat);
+            }
+
+            // === Gérer les earnings ===
+            List<Earning> existingEarnings = stat.getEarnings();
+            for (Earning e : slip.getEarnings()) {
+                boolean found = false;
+                for (Earning ex : existingEarnings) {
+                    if (ex.getSalary_component().equals(e.getSalary_component())) {
+                        ex.setAmount(ex.getAmount() + e.getAmount());
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    Earning newEarning = new Earning();
+                    newEarning.setSalary_component(e.getSalary_component());
+                    newEarning.setAmount(e.getAmount());
+                    existingEarnings.add(newEarning);
+                }
+            }
+
+            // === Gérer les deductions ===
+            List<Deduction> existingDeductions = stat.getDeductions();
+            for (Deduction d : slip.getDeductions()) {
+                boolean found = false;
+                for (Deduction ex : existingDeductions) {
+                    if (ex.getSalary_component().equals(d.getSalary_component())) {
+                        ex.setAmount(ex.getAmount() + d.getAmount());
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    Deduction newDeduction = new Deduction();
+                    newDeduction.setSalary_component(d.getSalary_component());
+                    newDeduction.setAmount(d.getAmount());
+                    existingDeductions.add(newDeduction);
+                }
+            }
+
+            // === Ajouter les totaux ===
+            stat.setGrossTotal(stat.getGrossTotal() + slip.getGrossPay());
+            stat.setNetTotal(stat.getNetTotal() + slip.getNetPay());
+            stat.setDeductionTotal(stat.getDeductionTotal() + slip.getTotalDeduction());
+        }
+
+        List<StatistiqueSalaire> result = new ArrayList<>(groupedStats.values());
+        result.sort(Comparator.comparing(StatistiqueSalaire::getMonth));
+
+        return result;
+    }
 }

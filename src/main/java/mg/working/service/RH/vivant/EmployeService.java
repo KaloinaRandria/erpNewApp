@@ -49,7 +49,7 @@ public class EmployeService {
         // Définition des champs à récupérer
         String resource = "Employee";
         String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
-        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam;
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam + "&limit_page_length=2500" ;
         // Construction de la requête
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -94,7 +94,7 @@ public class EmployeService {
         String fieldsParam = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
 
         // URL pour accéder à un employé spécifique
-        String url = erpnextUrl + "/api/resource/" + resource + "/" + name + "?fields=" + fieldsParam;
+        String url = erpnextUrl + "/api/resource/" + resource + "/" + name + "?fields=" + fieldsParam + "&limit_page_length=2500" ;
 
         // Construire la requête
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -211,7 +211,7 @@ public class EmployeService {
         String filters = mapper.writeValueAsString(filtersArray);
         String fields = "[\"name\",\"employee_name\",\"gender\",\"designation\",\"department\",\"status\",\"date_of_joining\",\"company\",\"branch\",\"cell_number\",\"company_email\"]";
 
-        String url = erpnextUrl + "/api/resource/Employee?fields=" + fields + "&filters=" + filters;
+        String url = erpnextUrl + "/api/resource/Employee?fields=" + fields + "&filters=" + filters + "&limit_page_length=2500";
 
 
         HttpEntity<String> request = new HttpEntity<>(headers);
