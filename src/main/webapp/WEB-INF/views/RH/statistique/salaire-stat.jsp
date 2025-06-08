@@ -4,6 +4,8 @@
 <%@ page import="mg.working.model.RH.salaire.component.Deduction" %>
 <%@ page import="mg.working.model.RH.salaire.component.Earning" %>
 <%@ page import="java.util.Locale" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="java.util.LinkedHashSet" %>
 
 <%
     // Récupération de la liste passée par le contrôleur
@@ -135,15 +137,21 @@
                 </div>
                 <% } %>
 
-                <!-- Espace pour le graphique Chart.js -->
-                <% if (statistiqueSalaires != null && !statistiqueSalaires.isEmpty()) { %>
-                <div class="mt-5">
-                    <h2 class="text-center mb-4">Évolution mensuelle des totaux</h2>
-                    <canvas id="salaryChart" height="400"></canvas>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="card">
+            <div class="card-body pt-4">
+                <div class="mt-5 d-flex justify-content-center">
+                    <div style="width: 80%; max-width: 900px;">
+                        <h2 class="text-center mb-4">Évolution mensuelle des totaux</h2>
+                        <canvas id="salaryChart" height="300"></canvas>
+                    </div>
                 </div>
-                <% } %>
 
             </div>
+
         </div>
     </section>
 
@@ -156,6 +164,20 @@
 
 <%-- Construire les tableaux JS à partir de stat.getMonth(), stat.getGrossTotal(), etc. --%>
 <script>
+    <%
+    // Préparer les composants uniques
+    Set<String> allEarningComponents = new LinkedHashSet<>();
+    Set<String> allDeductionComponents = new LinkedHashSet<>();
+    for (StatistiqueSalaire stat : statistiqueSalaires) {
+        for (Earning e : stat.getEarnings()) {
+            allEarningComponents.add(e.getSalary_component());
+        }
+        for (Deduction d : stat.getDeductions()) {
+            allDeductionComponents.add(d.getSalary_component());
+        }
+    }
+    %>
+
     <% if (statistiqueSalaires != null && !statistiqueSalaires.isEmpty()) { %>
     // Récupérer les données depuis le back-end
     const labels = [
@@ -193,6 +215,7 @@
         data: {
             labels: labels,
             datasets: [
+                // Total Earnings, Deductions, Net Pay (les 3 courbes globales)
                 {
                     label: "Total Earnings",
                     data: grossData,
@@ -214,9 +237,57 @@
                     borderColor: "#2c3e50",
                     borderWidth: 2,
                     tension: 0.2
+                },
+
+                // 👇 Détail des Earnings
+                <% for (String component : allEarningComponents) { %>
+                {
+                    label: "<%= component %>",
+                    data: [
+                        <% for (StatistiqueSalaire stat : statistiqueSalaires) {
+                            double amount = 0.0;
+                            for (Earning e : stat.getEarnings()) {
+                               if (e.getSalary_component().equals(component)) {
+                        amount = e.getAmount();
+                    break;
                 }
-            ]
-        },
+        } %>
+        <%= String.format(Locale.US, "%.2f", amount) %>,
+    <% } %>
+    ],
+    borderColor: "green",
+        borderWidth: 1,
+        borderDash: [2, 2],
+        tension: 0.2
+    },
+    <% } %>
+
+    // 👇 Détail des Deductions
+    <% for (String component : allDeductionComponents) { %>
+    {
+        label: "<%= component %>",
+            data: [
+        <% for (StatistiqueSalaire stat : statistiqueSalaires) {
+            double amount = 0.0;
+            for (Deduction d : stat.getDeductions()) {
+                if (d.getSalary_component().equals(component)) {
+        amount = d.getAmount();
+        break;
+    }
+    } %>
+    <%= String.format(Locale.US, "%.2f", amount) %>,
+    <% } %>
+    ],
+    borderColor: "red",
+        borderWidth: 1,
+        borderDash: [4, 2],
+        tension: 0.2
+    },
+    <% } %>
+    ]
+
+    },
+
         options: {
             responsive: true,
             plugins: {

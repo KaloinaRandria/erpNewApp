@@ -18,7 +18,7 @@ public class EmployeeImportDTO {
         formatter.setLenient(false);
         try {
             Date date = formatter.parse(dateString);
-            System.out.println("date: " + date.toString());
+//            System.out.println("date: " + date.toString());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

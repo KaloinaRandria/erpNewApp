@@ -31,7 +31,6 @@ public class ImportService {
 
     public void sendEmployeesToFrappe(String sid, String employeeData, String componentData,String employeeSalaryData) throws Exception {
         HttpHeaders headers = new HttpHeaders();
-        System.out.println("sid:"+sid);
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
