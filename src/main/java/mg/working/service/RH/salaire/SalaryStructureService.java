@@ -25,7 +25,6 @@ public class SalaryStructureService {
     public void createSalaryStructure(
             String sid,
             String name,
-            String modeOfPayment,
             List<Earning> earnings,
             List<Deduction> deductions
     ) throws Exception {
@@ -40,7 +39,9 @@ public class SalaryStructureService {
         payload.put("company", "My Company");
         payload.put("currency", "EUR");
         payload.put("payroll_frequency", "Monthly");  // e.g. "Monthly"
-        payload.put("mode_of_payment", "Cash");       // e.g. "Cash"
+        payload.put("mode_of_payment", "Cash");// e.g. "Cash"
+        payload.put("is_active", "Yes");
+
 
         // Ajouter earnings
         ArrayNode earningsArray = objectMapper.createArrayNode();

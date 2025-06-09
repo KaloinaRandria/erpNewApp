@@ -3,14 +3,14 @@ package mg.working.controller.RH;
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
+import mg.working.model.RH.salaire.component.Deduction;
+import mg.working.model.RH.salaire.component.Earning;
 import mg.working.service.RH.salaire.SalaireService;
+import mg.working.service.RH.salaire.SalaryStructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -24,6 +24,9 @@ public class SalaireController {
 
     @Autowired
     private SalaireService salaireService;
+
+    @Autowired
+    private SalaryStructureService salaryStructureService;
 
     @GetMapping("/salary-slip")
     public String getSalarySlipByName(HttpSession session ,
@@ -155,5 +158,38 @@ public class SalaireController {
             model.addAttribute("error", "Erreur lors du chargement des statistiques : " + e.getMessage());
             return "error/index";
         }
+    }
+
+    @PostMapping("/salary-structure/save")
+    public String createSalaryStructure(
+            HttpSession session,
+            @RequestParam String name,
+            @ModelAttribute("earnings") List<Earning> earnings,
+            @ModelAttribute("deductions") List<Deduction> deductions,
+            Model model
+    ) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            salaryStructureService.createSalaryStructure(
+                    sid,
+                    name,
+                    earnings,
+                    deductions
+            );
+
+            model.addAttribute("success", "Structure de salaire créée et soumise avec succès !");
+            return "redirect:/rh/salaire/salary-structure-form";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @GetMapping("/salary-structure")
+    public String goToSalaryStructureForm(HttpSession session) {
+        return "";
     }
 }
