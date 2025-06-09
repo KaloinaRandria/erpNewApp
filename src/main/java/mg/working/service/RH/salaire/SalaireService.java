@@ -52,7 +52,7 @@ public class SalaireService {
         return slips;
     }
 
-    public List<SalarySlip> getSalarySlipsByEmployee(String sid, String employeeId) throws Exception {
+    public List<SalarySlip> getSalarySlipsByEmployee(String sid, String employeeId) throws Exception  {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);

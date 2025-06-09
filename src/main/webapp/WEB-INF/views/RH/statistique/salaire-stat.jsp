@@ -145,9 +145,9 @@
         <div class="card">
             <div class="card-body pt-4">
                 <div class="mt-5 d-flex justify-content-center">
-                    <div style="width: 80%; max-width: 900px;">
+                    <div style="width: 100%;">
                         <h2 class="text-center mb-4">Évolution mensuelle des totaux</h2>
-                        <canvas id="salaryChart" height="300"></canvas>
+                        <canvas id="salaryChart" height="200"></canvas>
                     </div>
                 </div>
 
@@ -321,9 +321,6 @@
                     title: {
                         display: true,
                         text: 'Montant (€)'
-                    },
-                    ticks: {
-                        stepSize: 500000 // Ajustez selon vos besoins
                     }
                 }
             }
