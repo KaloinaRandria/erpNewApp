@@ -1,10 +1,5 @@
 package mg.working.service.RH.vivant;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +7,6 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import mg.working.model.RH.organisation.Departement;
-import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
