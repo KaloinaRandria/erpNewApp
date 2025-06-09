@@ -7,7 +7,7 @@ import java.util.Locale;
 public class Formatutil {
 
     public static String formaterMontant(double montant) {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.FRANCE);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator(' ');
         symbols.setDecimalSeparator(',');
 

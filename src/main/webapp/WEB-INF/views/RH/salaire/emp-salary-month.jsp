@@ -4,6 +4,7 @@
 <%@ page import="mg.working.service.RH.util.DateUtils" %>
 <%@ page import="mg.working.model.RH.salaire.component.Deduction" %>
 <%@ page import="mg.working.model.RH.salaire.component.Earning" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 <%
     List<SalarySlip> salarySlips = (List<SalarySlip>) request.getAttribute("salarySlips");
@@ -80,7 +81,7 @@
                                     <% for (Earning earning : slip.getEarnings()) { %>
                                     <li>
                                         <span class="text-primary fw-bold"><%= earning.getSalary_component() %></span> :
-                                        <span class="badge bg-light text-dark"><%= String.format("%.2f", earning.getAmount()) %> €</span>
+                                        <span class="badge bg-light text-dark"><%= Formatutil.formaterMontant(earning.getAmount()) %> €</span>
                                     </li>
                                     <% } %>
                                 </ul>
@@ -95,7 +96,7 @@
                                     <% for (Deduction deduction : slip.getDeductions()) { %>
                                     <li>
                                         <span class="text-danger fw-bold"><%= deduction.getSalary_component() %></span> :
-                                        <span class="badge bg-light text-dark"><%= String.format("%.2f", deduction.getAmount()) %> €</span>
+                                        <span class="badge bg-light text-dark"><%= Formatutil.formaterMontant(deduction.getAmount()) %> €</span>
                                     </li>
                                     <% } %>
                                 </ul>
@@ -105,8 +106,8 @@
                             </td>
 
 
-                            <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
-                            <td><strong><%= String.format("%.2f", slip.getNetPay()) %></strong></td>
+                            <td><%= Formatutil.formaterMontant(slip.getTotalDeduction()) %></td>
+                            <td><strong><%= Formatutil.formaterMontant(slip.getNetPay()) %></strong></td>
                             <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
                         </tr>
                         <% } %>

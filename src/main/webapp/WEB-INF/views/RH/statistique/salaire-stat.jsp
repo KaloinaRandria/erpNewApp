@@ -6,6 +6,7 @@
 <%@ page import="java.util.Locale" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.LinkedHashSet" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 <%
     // Récupération de la liste passée par le contrôleur
@@ -88,7 +89,7 @@
                                                             <%= earning.getSalary_component() %>
                                                         </span> :
                                         <span class="badge bg-light text-dark">
-                                                            <%= String.format("%.2f", earning.getAmount()) %> €
+                                                            <%= Formatutil.formaterMontant(earning.getAmount()) %> €
                                                         </span>
                                     </li>
                                     <% } %>
@@ -108,7 +109,7 @@
                                                             <%= deduction.getSalary_component() %>
                                                         </span> :
                                         <span class="badge bg-light text-dark">
-                                                            <%= String.format("%.2f", deduction.getAmount()) %> €
+                                                            <%= Formatutil.formaterMontant(deduction.getAmount()) %> €
                                                         </span>
                                     </li>
                                     <% } %>
@@ -118,11 +119,11 @@
                                 <% } %>
                             </td>
 
-                            <td><%= String.format("%.2f", stat.getGrossTotal()) %></td>
-                            <td><%= String.format("%.2f", stat.getDeductionTotal()) %></td>
+                            <td><%= Formatutil.formaterMontant(stat.getGrossTotal()) %></td>
+                            <td><%= Formatutil.formaterMontant(stat.getDeductionTotal()) %></td>
                             <td>
                                 <a href="${pageContext.request.contextPath}/rh/salaire/statistique-salaire/<%= stat.getMonth() %>">
-                                    <strong><%= String.format("%.2f", stat.getNetTotal()) %></strong>
+                                    <strong><%= Formatutil.formaterMontant(stat.getNetTotal()) %></strong>
                                 </a>
                             </td>
 
