@@ -332,5 +332,37 @@ public class EmployeService {
         return departements;
     }
 
+    public void createEmployee(String sid, String prenom, String nom, String employeeNumber, LocalDate dateOfBirth, LocalDate dateOfJoining, String gender) throws Exception {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Préparer le corps JSON
+        ObjectNode employeeJson = objectMapper.createObjectNode();
+        employeeJson.put("doctype", "Employee");
+        employeeJson.put("employee_name", prenom + " " + nom);
+        employeeJson.put("first_name", prenom);
+        employeeJson.put("last_name", nom);
+        employeeJson.put("employee_number", employeeNumber);
+        employeeJson.put("company", "My Company");
+        employeeJson.put("gender", gender); // "Male" ou "Female"
+        employeeJson.put("date_of_birth", dateOfBirth.toString());
+        employeeJson.put("date_of_joining", dateOfJoining.toString());
+        employeeJson.put("status", "Active");
+
+        // URL de création
+        String url = erpnextUrl + "/api/resource/Employee";
+        HttpEntity<String> request = new HttpEntity<>(employeeJson.toString(), headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new Exception("❌ Échec de la création de l'employé : " + response.getBody());
+        }
+
+        String empName = objectMapper.readTree(response.getBody()).path("data").path("name").asText();
+        System.out.println("✅ Employé créé avec succès : " + empName);
+    }
 
 }
