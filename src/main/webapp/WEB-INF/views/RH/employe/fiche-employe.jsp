@@ -2,6 +2,7 @@
 <%@ page import="mg.working.model.RH.vivant.Employe" %>
 <%@ page import="java.util.List" %>
 <%@ page import="mg.working.model.RH.salaire.SalarySlip" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 <%
     Employe employe = (Employe) request.getAttribute("employe");
@@ -118,9 +119,9 @@
                             <tr>
                                 <td><%= slip.getStartDate() %> au <%= slip.getEndDate() %></td>
                                 <td><%= slip.getPostingDate() %></td>
-                                <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
-                                <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
-                                <td><%= String.format("%.2f", slip.getNetPay()) %></td>
+                                <td><%= Formatutil.formaterMontant(slip.getGrossPay()) %></td>
+                                <td><%= Formatutil.formaterMontant(slip.getTotalDeduction()) %></td>
+                                <td><%= Formatutil.formaterMontant(slip.getNetPay()) %></td>
                                 <td><span class="badge bg-info text-dark"><%= slip.getStatus() %></span></td>
                                 <td class="d-flex gap-2">
                                     <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip" method="get" class="d-inline">

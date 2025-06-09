@@ -4,6 +4,8 @@ import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 public class SalarySlip {
@@ -93,6 +95,10 @@ public class SalarySlip {
 
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    public Date getStartDateString() {
+        return Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public void setStartDate(LocalDate startDate) {

@@ -2,6 +2,7 @@ package mg.working.model.RH.dto;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.regex.Pattern;
 
 public class EmployeeImportDTO {
     private String ref;
@@ -17,8 +18,11 @@ public class EmployeeImportDTO {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         formatter.setLenient(false);
         try {
+            if (!Pattern.matches("\\d{2}/\\d{2}/\\d{4}", dateString)) {
+                throw new Exception("Format de date invalide " + dateString);
+            }
             Date date = formatter.parse(dateString);
-            System.out.println("date: " + date.toString());
+//            System.out.println("date: " + date.toString());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

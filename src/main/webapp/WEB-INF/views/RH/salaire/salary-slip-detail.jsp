@@ -3,6 +3,7 @@
 <%@ page import="mg.working.model.RH.salaire.component.Earning" %>
 <%@ page import="mg.working.model.RH.salaire.component.Deduction" %>
 <%@ page import="java.util.List" %>
+<%@ page import="mg.working.service.formatage.Formatutil" %>
 
 <%
     SalarySlip slip = (SalarySlip) request.getAttribute("salarySlip");
@@ -56,17 +57,17 @@
 
                         <div class="row mb-3">
                             <div class="col-sm-4 fw-bold">Salaire brut (€) :</div>
-                            <div class="col-sm-8"><%= String.format("%.2f", slip.getGrossPay()) %></div>
+                            <div class="col-sm-8"><%= Formatutil.formaterMontant(slip.getGrossPay()) %></div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-sm-4 fw-bold">Déductions (€) :</div>
-                            <div class="col-sm-8"><%= String.format("%.2f", slip.getTotalDeduction()) %></div>
+                            <div class="col-sm-8"><%= Formatutil.formaterMontant(slip.getTotalDeduction()) %></div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-sm-4 fw-bold">Net à payer (€) :</div>
-                            <div class="col-sm-8"><%= String.format("%.2f", slip.getNetPay()) %></div>
+                            <div class="col-sm-8"><%= Formatutil.formaterMontant(slip.getNetPay()) %></div>
                         </div>
 
                         <div class="row mb-3">
@@ -111,15 +112,15 @@
                             <tbody>
                             <tr>
                                 <td><strong>Salaire brut</strong></td>
-                                <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
+                                <td><%= Formatutil.formaterMontant(slip.getGrossPay()) %></td>
                             </tr>
                             <tr>
                                 <td><strong>Déductions</strong></td>
-                                <td><%= String.format("%.2f", slip.getTotalDeduction()) %></td>
+                                <td><%= Formatutil.formaterMontant(slip.getTotalDeduction()) %></td>
                             </tr>
                             <tr class="table-success">
                                 <td><strong>Net à payer</strong></td>
-                                <td><strong><%= String.format("%.2f", slip.getNetPay()) %> €</strong></td>
+                                <td><strong><%= Formatutil.formaterMontant(slip.getNetPay()) %> €</strong></td>
                             </tr>
                             </tbody>
                         </table>
@@ -147,8 +148,8 @@
                                         for (Earning e : earnings) { %>
                                     <tr>
                                         <td><%= e.getSalary_component() %></td>
-                                        <td><%= String.format("%.2f", e.getAmount()) %></td>
-                                        <td><%= String.format("%.2f", e.getYear_to_date()) %></td>
+                                        <td><%= Formatutil.formaterMontant(e.getAmount()) %></td>
+                                        <td><%= Formatutil.formaterMontant(e.getYear_to_date()) %></td>
                                     </tr>
                                     <% }} else { %>
                                     <tr><td colspan="3" class="text-center">Aucun composant trouvé</td></tr>
@@ -175,8 +176,8 @@
                                         for (Deduction d : deductions) { %>
                                     <tr>
                                         <td><%= d.getSalary_component() %></td>
-                                        <td><%= String.format("%.2f", d.getAmount()) %></td>
-                                        <td><%= String.format("%.2f", d.getYear_to_date()) %></td>
+                                        <td><%= Formatutil.formaterMontant(d.getAmount()) %></td>
+                                        <td><%= Formatutil.formaterMontant(d.getYear_to_date()) %></td>
                                     </tr>
                                     <% }} else { %>
                                     <tr><td colspan="3" class="text-center">Aucune déduction trouvée</td></tr>

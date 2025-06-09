@@ -119,7 +119,12 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
-
+                        <!-- Bouton d'ajout d'employé -->
+                        <div class="mb-3 text-end mt-3">
+                            <a href="${pageContext.request.contextPath}/rh/employe/add-employe" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Ajouter un employé
+                            </a>
+                        </div>
                         <table class="table">
                             <thead>
                             <tr>
