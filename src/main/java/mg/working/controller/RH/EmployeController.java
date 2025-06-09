@@ -1,5 +1,6 @@
 package mg.working.controller.RH;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,16 +9,14 @@ import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.vivant.Gender;
 import mg.working.service.RH.salaire.SalaireService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.RH.vivant.Employe;
 import mg.working.service.RH.vivant.EmployeService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/rh/employe")
@@ -117,6 +116,54 @@ public class EmployeController {
         return "RH/employe/fiche-employe";
     }
 
+    @PostMapping("/save")
+    public String createEmploye(
+            HttpSession session,
+            Model model,
+            @RequestParam("prenom") String prenom,
+            @RequestParam("nom") String nom,
+            @RequestParam("matricule") String employeeNumber,
+            @RequestParam("dateNaissance") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfBirth,
+            @RequestParam("dateEmbauche") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfJoining,
+            @RequestParam("genre") String gender
+    ) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
 
+        try {
+            employeService.createEmployee(
+                    sid,
+                    prenom,
+                    nom,
+                    employeeNumber,
+                    dateOfBirth,
+                    dateOfJoining,
+                    gender
+            );
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return "redirect:/rh/employe/list";
+    }
+
+
+    @GetMapping("/add-employe")
+    public String goToCreateEmp(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            List<Gender> genders = employeService.listerGenres(sid);
+            model.addAttribute("genders", genders);
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            e.printStackTrace();
+            return "error/index";
+        }
+
+        return "RH/employe/add-employe";
+    }
 }
 
