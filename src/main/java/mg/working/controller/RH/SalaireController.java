@@ -2,9 +2,11 @@ package mg.working.controller.RH;
 
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.model.RH.salaire.SalaryStructureForm;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.service.RH.salaire.ComponentService;
 import mg.working.service.RH.salaire.SalaireService;
 import mg.working.service.RH.salaire.SalaryStructureService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class SalaireController {
 
     @Autowired
     private SalaryStructureService salaryStructureService;
+
+    @Autowired
+    private ComponentService componentService;
 
     @GetMapping("/salary-slip")
     public String getSalarySlipByName(HttpSession session ,
@@ -163,24 +168,33 @@ public class SalaireController {
     @PostMapping("/salary-structure/save")
     public String createSalaryStructure(
             HttpSession session,
-            @RequestParam String name,
-            @ModelAttribute("earnings") List<Earning> earnings,
-            @ModelAttribute("deductions") List<Deduction> deductions,
+            @ModelAttribute SalaryStructureForm salaryStructureForm,
             Model model
     ) {
         String sid = (String) session.getAttribute("sid");
         if (sid == null) return "redirect:/login";
 
         try {
+            // Ne prendre que les composants avec un montant > 0
+            List<Earning> earnings = salaryStructureForm.getEarnings()
+                    .stream()
+                    .filter(e -> e.getAmount() > 0)
+                    .collect(Collectors.toList());
+
+            List<Deduction> deductions = salaryStructureForm.getDeductions()
+                    .stream()
+                    .filter(d -> d.getAmount() > 0)
+                    .collect(Collectors.toList());
+
             salaryStructureService.createSalaryStructure(
                     sid,
-                    name,
+                    salaryStructureForm.getName(),
                     earnings,
                     deductions
             );
 
             model.addAttribute("success", "Structure de salaire créée et soumise avec succès !");
-            return "redirect:/rh/salaire/salary-structure-form";
+            return "redirect:/accueil";
 
         } catch (Exception e) {
             model.addAttribute("error", "Erreur : " + e.getMessage());
@@ -188,8 +202,20 @@ public class SalaireController {
         }
     }
 
+
     @GetMapping("/salary-structure")
-    public String goToSalaryStructureForm(HttpSession session) {
-        return "";
+    public String goToSalaryStructureForm(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            model.addAttribute("earningsComponents", componentService.getEarnings(sid));
+            model.addAttribute("deductionsComponents",componentService.getDeductions(sid));
+            return "RH/salaire/salary-structure-form";
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors du chargement des composants : " + e.getMessage());
+            e.printStackTrace();
+            return "error/index";
+        }
     }
 }

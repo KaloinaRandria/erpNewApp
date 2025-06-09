@@ -32,6 +32,11 @@
               <i class="bi bi-circle"></i><span>Statistiques</span>
           </a>
       </li>
+      <li>
+          <a href="${pageContext.request.contextPath}/rh/salaire/salary-structure">
+              <i class="bi bi-circle"></i><span>Ajouter Salary Structure</span>
+          </a>
+      </li>
   </ul>
 
 
