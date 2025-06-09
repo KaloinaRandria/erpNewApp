@@ -2,17 +2,21 @@ package mg.working.controller.RH;
 
 import jakarta.servlet.http.HttpSession;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.service.RH.salaire.SalaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/rh/salaire")
@@ -33,8 +37,9 @@ public class SalaireController {
             model.addAttribute("salarySlip", salarySlip);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
-//            model.addAttribute("error", "Erreur : " + e.getMessage());
+//            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
         }
 
         return "RH/salaire/salary-slip-detail";
@@ -73,10 +78,82 @@ public class SalaireController {
             model.addAttribute("salarySlips", salarySlips);
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors de la récupération des bulletins : " + e.getMessage());
-            e.printStackTrace();
+            return "error/index";
+//            e.printStackTrace();
         }
 
         return "RH/salaire/emp-salary-month";
     }
 
+    @GetMapping("/statistique-salaire/{monthYear}")
+    public String getSalarySlipsByMonthNoFilter(HttpSession session,
+                                                @PathVariable(name = "monthYear") String monthYear,
+                                                Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            List<SalarySlip> salarySlips;
+
+            Integer selectedYear = null;
+            Integer selectedMonth = null;
+
+            if (monthYear != null && !monthYear.isEmpty()) {
+                try {
+                    YearMonth ym = YearMonth.parse(monthYear); // format yyyy-MM
+                    selectedYear = ym.getYear();
+                    selectedMonth = ym.getMonthValue();
+
+                    salarySlips = salaireService.getSalarySlipsByMonth(sid, selectedYear, selectedMonth);
+                } catch (DateTimeParseException e) {
+                    model.addAttribute("error", "Le format de la date est invalide.");
+                    salarySlips = salaireService.getAllSalarySlips(sid);
+                }
+            } else {
+                salarySlips = salaireService.getAllSalarySlips(sid);
+            }
+
+            model.addAttribute("salarySlips", salarySlips);
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors de la récupération des bulletins : " + e.getMessage());
+            return "error/index";
+        }
+        return "RH/statistique/salaire-stat-details";
+    }
+
+    @GetMapping("/statistique-salaire")
+    public String afficherStatistiquesSalaire(
+            HttpSession session,
+            @RequestParam(name = "year", required = false) Integer year,
+            Model model) {
+
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Si aucun 'year' fourni, on utilise l'année courante
+            int selectedYear = (year != null) ? year : LocalDate.now().getYear();
+            model.addAttribute("selectedYear", selectedYear);
+
+            // Récupérer tous les bulletins
+            List<SalarySlip> allSlips = salaireService.getAllSalarySlips(sid);
+
+            // Filtrer pour ne conserver que ceux de l'année sélectionnée
+            List<SalarySlip> slipsFiltered = allSlips.stream()
+                    .filter(slip -> slip.getStartDate().getYear() == selectedYear)
+                    .collect(Collectors.toList());
+
+            // Regroupement par mois
+            List<StatistiqueSalaire> stats = salaireService.groupSalarySlipsByMonth(slipsFiltered);
+
+            model.addAttribute("stats", stats);
+            return "RH/statistique/salaire-stat";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors du chargement des statistiques : " + e.getMessage());
+            return "error/index";
+        }
+    }
 }

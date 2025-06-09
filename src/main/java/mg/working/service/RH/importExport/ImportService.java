@@ -31,7 +31,6 @@ public class ImportService {
 
     public void sendEmployeesToFrappe(String sid, String employeeData, String componentData,String employeeSalaryData) throws Exception {
         HttpHeaders headers = new HttpHeaders();
-        System.out.println("sid:"+sid);
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -90,10 +89,15 @@ public class ImportService {
 
                 String mois = line[0].trim();
                 int refEmploye = Integer.parseInt(line[1].trim());
-                double salaireBase = Double.parseDouble(line[2].trim());
+                double salaireBase = Double.parseDouble(line[2].trim().replace(" ","").replace(",","."));
                 String salaire = line[3].trim();
 
-                EmployeeSalaryDTO dto = new EmployeeSalaryDTO(mois, refEmploye, salaireBase, salaire);
+                EmployeeSalaryDTO dto = new EmployeeSalaryDTO();
+                dto.setMois(mois);
+                dto.setRefEmploye(refEmploye);
+                dto.setSalaireBase(salaireBase);
+                dto.setSalaire(salaire);
+
                 result.add(dto);
             }
 

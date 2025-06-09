@@ -8,8 +8,6 @@
 
 <%
     List<SalarySlip> salarySlips = (List<SalarySlip>) request.getAttribute("salarySlips");
-    Integer selectedYear = (Integer) request.getAttribute("selectedYear");
-    Integer selectedMonth = (Integer) request.getAttribute("selectedMonth");
 %>
 
 <!DOCTYPE html>
@@ -36,23 +34,6 @@
     <section class="section">
         <div class="card">
             <div class="card-body pt-4">
-
-                <!-- Filtre -->
-                <form method="get" action="${pageContext.request.contextPath}/rh/salaire/salary-month" class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <label for="monthYear" class="form-label">Mois</label>
-                        <input type="month" class="form-control" id="monthYear" name="monthYear"
-                               value="<% if (selectedYear != null && selectedMonth != null) {
-                           String monthFormatted = String.format("%02d", selectedMonth);
-                           out.print(selectedYear + "-" + monthFormatted);
-                       } %>">
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success">Filtrer</button>
-                        <a href="${pageContext.request.contextPath}/rh/salaire/salary-month" class="btn btn-secondary ms-2">Réinitialiser</a>
-                    </div>
-                </form>
-
 
                 <!-- Tableau -->
                 <% if (salarySlips != null && !salarySlips.isEmpty()) { %>
@@ -89,7 +70,7 @@
                                 <span class="text-muted">-</span>
                                 <% } %>
                             </td>
-                            <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
+                            <td><%= Formatutil.formaterMontant(slip.getGrossPay()) %></td>
                             <td>
                                 <% if (slip.getDeductions() != null && !slip.getDeductions().isEmpty()) { %>
                                 <ul class="list-unstyled mb-0">

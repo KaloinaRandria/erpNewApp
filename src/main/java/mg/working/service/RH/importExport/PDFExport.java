@@ -3,6 +3,7 @@ package mg.working.service.RH.importExport;
 import com.itextpdf.html2pdf.HtmlConverter;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.service.formatage.Formatutil;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
@@ -26,7 +27,7 @@ public class PDFExport {
             <tbody>
     """);
         slip.getEarnings().forEach(e -> earningsTable.append(
-                "<tr><td>" + e.getSalary_component() + "</td><td>" + String.format("%.2f", e.getAmount()) + "</td><td>" + String.format("%.2f", e.getYear_to_date()) + "</td></tr>"
+                "<tr><td>" + e.getSalary_component() + "</td><td>" + Formatutil.formaterMontant(e.getAmount()) + "</td><td>" + Formatutil.formaterMontant(e.getYear_to_date()) + "</td></tr>"
         ));
         earningsTable.append("</tbody></table>");
 
@@ -41,7 +42,7 @@ public class PDFExport {
             <tbody>
     """);
         slip.getDeductions().forEach(d -> deductionsTable.append(
-                "<tr><td>" + d.getSalary_component() + "</td><td>" + String.format("%.2f", d.getAmount()) + "</td><td>" + String.format("%.2f", d.getYear_to_date()) + "</td></tr>"
+                "<tr><td>" + d.getSalary_component() + "</td><td>" + Formatutil.formaterMontant(d.getAmount()) + "</td><td>" + Formatutil.formaterMontant(d.getYear_to_date()) + "</td></tr>"
         ));
         deductionsTable.append("</tbody></table>");
 
@@ -66,13 +67,11 @@ public class PDFExport {
     </style>
 </head>
 <body>
-    <h2>Bulletin de Salaire</h2>
+    <h2>Salary Slip</h2>
 
     <div class='section'>
         <div class='row'><span class='label'>Nom :</span><span class='value'>%s</span></div>
         <div class='row'><span class='label'>Matricule :</span><span class='value'>%s</span></div>
-        <div class='row'><span class='label'>Département :</span><span class='value'>%s</span></div>
-        <div class='row'><span class='label'>Poste :</span><span class='value'>%s</span></div>
         <div class='row'><span class='label'>Période :</span><span class='value'>%s au %s</span></div>
         <div class='row'><span class='label'>Date de versement :</span><span class='value'>%s</span></div>
     </div>
@@ -82,9 +81,9 @@ public class PDFExport {
             <tr><th>Composant</th><th>Montant (€)</th></tr>
         </thead>
         <tbody>
-            <tr><td>Salaire brut</td><td>%.2f</td></tr>
-            <tr><td>Déductions</td><td>%.2f</td></tr>
-            <tr class='total'><td>Net à payer</td><td>%.2f</td></tr>
+            <tr><td>Salaire brut</td><td>%s</td></tr>
+            <tr><td>Déductions</td><td>%s</td></tr>
+            <tr class='total'><td>Net à payer</td><td>%s</td></tr>
         </tbody>
     </table>
 
@@ -100,14 +99,12 @@ public class PDFExport {
 """.formatted(
                 slip.getEmployeeName(),
                 slip.getEmployee(),
-                slip.getDepartment(),
-                slip.getDesignation(),
                 slip.getStartDate(),
                 slip.getEndDate(),
                 slip.getPostingDate(),
-                slip.getGrossPay(),
-                slip.getTotalDeduction(),
-                slip.getNetPay(),
+                Formatutil.formaterMontant(slip.getGrossPay()),
+                Formatutil.formaterMontant(slip.getTotalDeduction()),
+                Formatutil.formaterMontant(slip.getNetPay()),
                 slip.getStatus(),
                 earningsTable.toString(),
                 deductionsTable.toString()
