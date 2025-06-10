@@ -48,7 +48,7 @@ public class SalaryStructureService {
         for (Earning earning : earnings) {
             ObjectNode row = objectMapper.createObjectNode();
             row.put("salary_component", earning.getSalary_component());
-            row.put("amount", earning.getAmount());
+            row.put("formula", earning.getFormula());
             earningsArray.add(row);
         }
         payload.set("earnings", earningsArray);
@@ -58,7 +58,7 @@ public class SalaryStructureService {
         for (Deduction deduction : deductions) {
             ObjectNode row = objectMapper.createObjectNode();
             row.put("salary_component", deduction.getSalary_component());
-            row.put("amount", deduction.getAmount());
+            row.put("formula", deduction.getFormula());
             deductionsArray.add(row);
         }
         payload.set("deductions", deductionsArray);

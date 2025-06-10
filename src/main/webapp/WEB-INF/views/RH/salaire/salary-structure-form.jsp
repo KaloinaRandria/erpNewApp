@@ -45,10 +45,15 @@
                             <input type="hidden" name="earnings[<%= i %>].salary_component" value="<%= comp.getSalary_component() %>" />
                             <label><%= comp.getSalary_component() %></label>
                         </div>
-                        <div class="col-md-3">
-                            <input type="number" step="0.01" min="0" class="form-control" name="earnings[<%= i %>].amount" value="0.00"
-                                   placeholder="Montant (€)">
+<%--                        <div class="col-md-3">--%>
+<%--                            <input type="number" step="0.01" min="0" class="form-control" name="earnings[<%= i %>].amount" value="0.00"--%>
+<%--                                   placeholder="Montant (€)">--%>
+<%--                        </div>--%>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="earnings[<%= i %>].formula"
+                                   placeholder="formule">
                         </div>
+
                     </div>
                     <%
                             i++;
@@ -68,9 +73,13 @@
                             <input type="hidden" name="deductions[<%= j %>].salary_component" value="<%= comp.getSalary_component() %>" />
                             <label><%= comp.getSalary_component() %></label>
                         </div>
-                        <div class="col-md-3">
-                            <input type="number" step="0.01" min="0" class="form-control" name="deductions[<%= j %>].amount" value="0.00"
-                                   placeholder="Montant (€)">
+<%--                        <div class="col-md-3">--%>
+<%--                            <input type="number" step="0.01" min="0" class="form-control" name="deductions[<%= j %>].amount" value="0.00"--%>
+<%--                                   placeholder="Montant (€)">--%>
+<%--                        </div>--%>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" name="deductions[<%= j %>].formula"
+                                   placeholder="formule">
                         </div>
                     </div>
                     <%

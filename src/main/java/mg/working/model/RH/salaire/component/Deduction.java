@@ -5,6 +5,16 @@ public class Deduction {
     private Double amount;
     private double year_to_date;
     private boolean selected;
+    private String formula;
+
+    public String getFormula() {
+        return formula;
+    }
+
+    public void setFormula(String formula) {
+        this.formula = formula;
+    }
+
     public boolean isSelected() { return selected; }
     public void setSelected(boolean selected) { this.selected = selected; }
 

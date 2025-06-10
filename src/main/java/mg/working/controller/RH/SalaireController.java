@@ -175,15 +175,14 @@ public class SalaireController {
         if (sid == null) return "redirect:/login";
 
         try {
-            // Ne prendre que les composants avec un montant > 0
             List<Earning> earnings = salaryStructureForm.getEarnings()
                     .stream()
-                    .filter(e -> e.getAmount() > 0)
+                    .filter(e -> (e.getAmount() != null && e.getAmount() > 0) || (e.getFormula() != null && !e.getFormula().isEmpty()))
                     .collect(Collectors.toList());
 
             List<Deduction> deductions = salaryStructureForm.getDeductions()
                     .stream()
-                    .filter(d -> d.getAmount() > 0)
+                    .filter(d -> (d.getAmount() != null && d.getAmount() > 0) || (d.getFormula() != null && !d.getFormula().isEmpty()))
                     .collect(Collectors.toList());
 
             salaryStructureService.createSalaryStructure(
