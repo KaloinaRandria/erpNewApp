@@ -37,6 +37,11 @@
               <i class="bi bi-circle"></i><span>Ajouter Salary Structure</span>
           </a>
       </li>
+      <li>
+          <a href="${pageContext.request.contextPath}/rh/salaire/salary-slip-form">
+              <i class="bi bi-circle"></i><span>Generer Salary Slip</span>
+          </a>
+      </li>
   </ul>
 
 

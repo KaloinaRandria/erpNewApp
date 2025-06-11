@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import mg.working.model.RH.organisation.Company;
 import mg.working.model.RH.organisation.Departement;
 import mg.working.model.RH.vivant.Gender;
 import org.springframework.beans.factory.annotation.Value;
@@ -359,4 +360,34 @@ public class EmployeService {
         System.out.println("✅ Employé créé avec succès : " + empName);
     }
 
+    public List<Company> getCompanyList(String sid) throws Exception {
+        // Préparation des en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Définition des champs à récupérer
+        String resource = "Company";
+        String fieldsParam = "[\"name\"]";
+        String url = erpnextUrl + "/api/resource/" + resource + "?fields=" + fieldsParam + "&limit_page_length=2500" ;
+        // Construction de la requête
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des employés : " + response.getStatusCode());
+        }
+
+        // Traitement de la réponse JSON
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode dataNode = root.get("data");
+
+        List<Company> companyList = new ArrayList<>();
+        for (JsonNode companyNode : dataNode) {
+            Company company = new Company();
+            company.setName(companyNode.get("name").asText());
+            companyList.add(company);
+        }
+        return companyList;
+    }
 }

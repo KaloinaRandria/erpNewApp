@@ -1,19 +1,24 @@
 package mg.working.controller.RH;
 
 import jakarta.servlet.http.HttpSession;
+import mg.working.model.RH.organisation.Company;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.SalaryStructureForm;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.model.RH.vivant.Employe;
 import mg.working.service.RH.salaire.ComponentService;
 import mg.working.service.RH.salaire.SalaireService;
 import mg.working.service.RH.salaire.SalaryStructureService;
+import mg.working.service.RH.util.CompanyService;
+import mg.working.service.RH.vivant.EmployeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -32,6 +37,10 @@ public class SalaireController {
 
     @Autowired
     private ComponentService componentService;
+
+    @Autowired
+    private EmployeService employeService;
+
 
     @GetMapping("/salary-slip")
     public String getSalarySlipByName(HttpSession session ,
@@ -216,5 +225,48 @@ public class SalaireController {
             e.printStackTrace();
             return "error/index";
         }
+    }
+
+    @GetMapping("/salary-slip-form")
+    public String goToSalarySlipForm(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            List<Employe> employes = employeService.listerEmployes(sid);
+            List<SalaryStructureForm> salaryStructureForms = salaryStructureService.listSalaryStructure(sid);
+            List<Company> companies = employeService.getCompanyList(sid);
+            model.addAttribute("employes", employes);
+            model.addAttribute("salaryStructureForms", salaryStructureForms);
+            model.addAttribute("companies", companies);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+        }
+
+        return "RH/salaire/salary-slip-form";
+    }
+
+    @PostMapping("/generer-salary-slip")
+    public String genererSalarySlip(HttpSession session, Model model,
+                                    @RequestParam(name = "employe") String employee,
+                                    @RequestParam(name = "startDate") String startDate,
+                                    @RequestParam(name = "endDate") String endDate) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            salaireService.genererSalarySlip(sid , employee , startDate, endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+
+        return "redirect:/accueil";
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import mg.working.model.RH.salaire.SalaryStructureForm;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -94,4 +96,35 @@ public class SalaryStructureService {
         System.out.println("✅ Salary Structure soumis avec succès : " + createdName);
     }
 
+    public List<SalaryStructureForm> listSalaryStructure(String sid) throws Exception {
+        // Préparer les en-têtes HTTP avec le cookie de session
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String fieldsParam = "[\"name\"]";
+        String url = erpnextUrl + "/api/resource/Salary Structure?fields=" + fieldsParam ;
+
+        // Construire la requête HTTP
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération du Salary Slip : " + response.getStatusCode());
+        }
+
+        // Lire le corps de la réponse
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        List<SalaryStructureForm> salaryStructureForms = new ArrayList<>();
+        for (JsonNode row : data) {
+            SalaryStructureForm salaryStructure = new SalaryStructureForm();
+            salaryStructure.setName(row.path("name").asText());
+
+            salaryStructureForms.add(salaryStructure);
+        }
+
+        return salaryStructureForms;
+    }
 }

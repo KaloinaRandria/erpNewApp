@@ -11,8 +11,11 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -260,5 +263,94 @@ public class SalaireService {
         result.sort(Comparator.comparing(StatistiqueSalaire::getMonth));
 
         return result;
+    }
+
+    public void insertSalaryStructureAssignment(String sid, String employee, String structure, String fromDate, double base, String company) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String data = "{" +
+                "\"doctype\": \"Salary Structure Assignment\"," +
+                "\"employee\": \"" + employee + "\"," +
+                "\"salary_structure\": \"" + structure + "\"," +
+                "\"from_date\": \"" + fromDate + "\"," +
+                "\"base\": " + base + "," +
+                "\"company\": \"" + company + "\"" +
+                "}";
+
+        String url = erpnextUrl + "/api/resource/Salary Structure Assignment";
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+            System.out.println("✔ Assignment créé : " + response.getBody());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String company = "Orinasa SA";
+        String data = "{" +
+                "\"doctype\": \"Salary Slip\"," +
+                "\"employee\": \"" + employee + "\"," +
+                "\"salary_structure\": \"" + structure + "\"," +
+                "\"start_date\": \"" + startDate + "\"," +
+                "\"end_date\": \"" + endDate + "\"," +
+                "\"payroll_frequency\": \"Monthly\"," +
+                "\"company\": \"" + company + "\"" +
+                "}";
+
+        String url = erpnextUrl + "/api/resource/Salary Slip";
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+            System.out.println("✔ Salary Slip créé : " + response.getBody());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void genererSalarySlip(String sid , String employe , String startMois , String endMois) throws Exception {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        YearMonth yearMonth = YearMonth.parse(startMois , formatter);
+
+        String dateDebut = yearMonth.atDay(1).toString();
+        String dateFin = yearMonth.atEndOfMonth().toString();
+
+        int year = yearMonth.getYear();
+        int month = yearMonth.getMonthValue();
+
+        System.out.println("year : " + year);
+        System.out.println("month : " + month);
+        SalarySlip salarySlip = null;
+
+        List<SalarySlip> salarySlips = getSalarySlipsByMonth(sid , year , month);
+        System.out.println("salarySlips : " + salarySlips.size());
+        for (SalarySlip slip : salarySlips) {
+            System.out.println("emp" + slip.getEmployeeName());
+            if (slip.getEmployeeName().equals(employe)) {
+                salarySlip = slip;
+                break;
+            }
+        }
+
+        insertSalarySlip(sid , employe ,salarySlip.getSalaryStructure() , dateDebut , dateFin);
     }
 }
