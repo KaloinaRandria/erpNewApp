@@ -7,6 +7,7 @@ import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -324,32 +325,62 @@ public class SalaireService {
         }
     }
 
+    public boolean salarySlipExists(String sid, String employeeId, String startDate, String endDate) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    public void genererSalarySlip(String sid , String employe , String startMois , String endMois) throws Exception {
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]" +
+                "&filters=[[\"Salary Slip\",\"employee\",\"=\",\"" + employeeId + "\"]," +
+                "[\"start_date\",\"=\",\"" + startDate + "\"]," +
+                "[\"end_date\",\"=\",\"" + endDate + "\"]]";
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
-        YearMonth yearMonth = YearMonth.parse(startMois , formatter);
+        HttpEntity<String> request = new HttpEntity<>(headers);
 
-        String dateDebut = yearMonth.atDay(1).toString();
-        String dateFin = yearMonth.atEndOfMonth().toString();
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
 
-        int year = yearMonth.getYear();
-        int month = yearMonth.getMonthValue();
+            JSONObject json = new JSONObject(response.getBody());
+            JSONArray data = json.getJSONArray("data");
 
-        System.out.println("year : " + year);
-        System.out.println("month : " + month);
-        SalarySlip salarySlip = null;
-
-        List<SalarySlip> salarySlips = getSalarySlipsByMonth(sid , year , month);
-        System.out.println("salarySlips : " + salarySlips.size());
-        for (SalarySlip slip : salarySlips) {
-            System.out.println("emp" + slip.getEmployeeName());
-            if (slip.getEmployeeName().equals(employe)) {
-                salarySlip = slip;
-                break;
-            }
+            return !data.isEmpty(); // true si au moins un Salary Slip existe
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Par sécurité, considérer que ça n'existe pas
         }
+    }
 
-        insertSalarySlip(sid , employe ,salarySlip.getSalaryStructure() , dateDebut , dateFin);
+    public void generateSalarySlips(String sid, String employeeId, String salaryStructure, String startMonth, String endMonth) {
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate start = YearMonth.parse(startMonth, monthFormatter).atDay(1);
+        LocalDate end = YearMonth.parse(endMonth, monthFormatter).atEndOfMonth();
+
+        LocalDate current = start;
+        while (!current.isAfter(end)) {
+            YearMonth ym = YearMonth.from(current);
+            LocalDate startDate = ym.atDay(1);
+            LocalDate endDate = ym.atEndOfMonth();
+
+            String sDate = startDate.format(dateFormatter);
+            String eDate = endDate.format(dateFormatter);
+
+            if (salarySlipExists(sid, employeeId, sDate, eDate)) {
+                System.out.println("⚠ Salary Slip existe déjà pour " + ym.getMonth() + " " + ym.getYear() + ", on saute.");
+            } else {
+                System.out.println("✅ Création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
+                insertSalarySlip(sid, employeeId, salaryStructure, sDate, eDate);
+            }
+
+
+            // Mois suivant
+            current = current.plusMonths(1);
+        }
     }
 }

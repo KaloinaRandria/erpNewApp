@@ -252,6 +252,7 @@ public class SalaireController {
     @PostMapping("/generer-salary-slip")
     public String genererSalarySlip(HttpSession session, Model model,
                                     @RequestParam(name = "employe") String employee,
+                                    @RequestParam(name = "structure") String structure,
                                     @RequestParam(name = "startDate") String startDate,
                                     @RequestParam(name = "endDate") String endDate,
                                     @RequestParam(name = "salaireBase") String salaireBase) {
@@ -261,7 +262,7 @@ public class SalaireController {
         }
 
         try {
-            salaireService.genererSalarySlip(sid , employee , startDate, endDate);
+            salaireService.generateSalarySlips(sid , employee , structure , startDate , endDate);
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Erreur : " + e.getMessage());
