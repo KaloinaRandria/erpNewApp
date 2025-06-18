@@ -20,13 +20,13 @@
 
 <main id="main" class="main">
     <div class="pagetitle">
-        <h1>Créer une Salary Assignement</h1>
+        <h1>Generer Salary Slip</h1>
     </div>
 
     <section class="section">
         <div class="card">
             <div class="card-body pt-4">
-                <form action="${pageContext.request.contextPath}/rh/salaire/generer-salary-slip" method="post">
+                <form action="${pageContext.request.contextPath}/rh/salaire/salary-slip/save" method="post">
 
                     <!-- Nom du Salary Structure -->
                     <div class="mb-3">
@@ -56,15 +56,19 @@
                         </select>
                     </div>
 
+                    <div class="col-md-2">
+                        <label for="startDate" class="form-label">Salaire de Base</label>
+                        <input type="number" class="form-control" id="salaireBase" name="salaireBase">
+                    </div>
 
                     <div class="col-md-2">
                         <label for="startDate" class="form-label">Date début</label>
-                        <input type="month" class="form-control" id="startDate" name="startDate" value="">
+                        <input type="date" class="form-control" id="startDate" name="startDate" value="">
                     </div>
 
                     <div class="col-md-2">
                         <label for="endDate" class="form-label">Date fin</label>
-                        <input type="month" class="form-control" id="endDate" name="endDate" value="">
+                        <input type="date" class="form-control" id="endDate" name="endDate" value="">
                     </div>
 
                     <div class="text-end mt-4">

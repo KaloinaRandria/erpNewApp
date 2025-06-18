@@ -2,10 +2,12 @@ package mg.working.service.RH.salaire;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -265,41 +267,12 @@ public class SalaireService {
         return result;
     }
 
-    public void insertSalaryStructureAssignment(String sid, String employee, String structure, String fromDate, double base, String company) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cookie", "sid=" + sid);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        String data = "{" +
-                "\"doctype\": \"Salary Structure Assignment\"," +
-                "\"employee\": \"" + employee + "\"," +
-                "\"salary_structure\": \"" + structure + "\"," +
-                "\"from_date\": \"" + fromDate + "\"," +
-                "\"base\": " + base + "," +
-                "\"company\": \"" + company + "\"" +
-                "}";
-
-        String url = erpnextUrl + "/api/resource/Salary Structure Assignment";
-        HttpEntity<String> request = new HttpEntity<>(data, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    String.class
-            );
-            System.out.println("✔ Assignment créé : " + response.getBody());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
         String company = "Orinasa SA";
+
         String data = "{" +
                 "\"doctype\": \"Salary Slip\"," +
                 "\"employee\": \"" + employee + "\"," +
@@ -310,21 +283,47 @@ public class SalaireService {
                 "\"company\": \"" + company + "\"" +
                 "}";
 
-        String url = erpnextUrl + "/api/resource/Salary Slip";
+        String createUrl = erpnextUrl + "/api/resource/Salary Slip";
         HttpEntity<String> request = new HttpEntity<>(data, headers);
 
         try {
+            // 1. Créer le Salary Slip
             ResponseEntity<String> response = restTemplate.exchange(
-                    url,
+                    createUrl,
                     HttpMethod.POST,
                     request,
                     String.class
             );
             System.out.println("✔ Salary Slip créé : " + response.getBody());
+
+            // Après création :
+            String body = response.getBody();
+            JSONObject json = new JSONObject(body);
+            JSONObject fullDoc = json.getJSONObject("data");
+
+// Soumettre le Salary Slip
+            String submitUrl = erpnextUrl + "/api/method/frappe.client.submit";
+
+// Important : Frapper veut un champ "doc" contenant un JSON complet de l'objet
+            JSONObject payload = new JSONObject();
+            payload.put("doc", fullDoc);
+
+            HttpEntity<String> submitRequest = new HttpEntity<>(payload.toString(), headers);
+
+            ResponseEntity<String> submitResponse = restTemplate.exchange(
+                    submitUrl,
+                    HttpMethod.POST,
+                    submitRequest,
+                    String.class
+            );
+
+            System.out.println("✔ Salary Slip soumis : " + submitResponse.getBody());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     public void genererSalarySlip(String sid , String employe , String startMois , String endMois) throws Exception {
 

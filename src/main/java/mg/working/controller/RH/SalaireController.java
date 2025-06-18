@@ -253,7 +253,8 @@ public class SalaireController {
     public String genererSalarySlip(HttpSession session, Model model,
                                     @RequestParam(name = "employe") String employee,
                                     @RequestParam(name = "startDate") String startDate,
-                                    @RequestParam(name = "endDate") String endDate) {
+                                    @RequestParam(name = "endDate") String endDate,
+                                    @RequestParam(name = "salaireBase") String salaireBase) {
         String sid = (String) session.getAttribute("sid");
         if (sid == null) {
             return "redirect:/login";
@@ -261,6 +262,27 @@ public class SalaireController {
 
         try {
             salaireService.genererSalarySlip(sid , employee , startDate, endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+
+        return "redirect:/accueil";
+    }
+
+    @PostMapping("/salary-slip/save")
+    public String insertSalarySlip(HttpSession session, Model model ,
+                                   @RequestParam(name = "employe") String employe,
+                                   @RequestParam(name = "structure") String structure,
+                                   @RequestParam(name = "startDate") String startDate,
+                                   @RequestParam(name = "endDate") String endDate) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+        try {
+            this.salaireService.insertSalarySlip(sid , employe, structure, startDate, endDate);
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Erreur : " + e.getMessage());
