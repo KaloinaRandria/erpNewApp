@@ -401,8 +401,46 @@ public class SalaireService {
         return null;
     }
 
+    public List<SalarySlip> getSalarySlipsByMonth2(String sid , String lastMonth , String employeeId) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    public void generateSalarySlips(String sid, String employeeId, String salaryStructure, String startMonth, String endMonth) {
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"*\"]&limit_page_length=2500";
+
+        if (lastMonth != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+            YearMonth yearMonth = YearMonth.parse(lastMonth , formatter);
+
+            String startDate = yearMonth.atDay(1).toString();
+            String filters = String.format("[[\"Salary Slip\" , \"start_date\" , \"<=\" , \"%s\"]]" , startDate);
+            url += "&filters="  + filters;
+        }
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des bulletins de salaire : " + response.getStatusCode());
+        }
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        List<SalarySlip> slips = new ArrayList<>();
+        for (JsonNode node : data) {
+            if (node.path("docstatus").asInt() != 2) {
+                String name = node.path("name").asText();
+                SalarySlip slip = getSalarySlipByName(sid, name);// ✅ récupère earnings et deductions
+                if (slip.getEmployee().equals(employeeId)) {
+                    slips.add(slip);
+                }
+            }
+        }
+        slips.sort(Comparator.comparing(SalarySlip::getStartDate).reversed());
+        return slips;
+    }
+
+    public void generateSalarySlips(String sid, String employeeId, String startMonth, String endMonth , double base) throws Exception {
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -419,14 +457,20 @@ public class SalaireService {
             String eDate = endDate.format(dateFormatter);
 
             try {
-                String ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
+                List<SalarySlip> salarySlips = this.getSalarySlipsByMonth2(sid , startMonth , employeeId);
+                String ssa;
+                if (base > 0 ) {
+                    ssa = this.insertSalaryStructureAssignment(sid , employeeId , salarySlips.get(0).getSalaryStructure() , startDate.toString() , base);
+                } else {
+                    ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
+                }
                 System.out.println("➡ Tentative de création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
-                insertSalarySlip(sid, employeeId, salaryStructure, sDate, eDate, ssa);
+                insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa);
             } catch (Exception e) {
                 if (e.getMessage().contains("already exists") || e.getMessage().contains("Duplicate")) {
                     System.out.println("⚠ Salary Slip déjà existant pour " + ym.getMonth() + " " + ym.getYear() + ", ignoré.");
                 } else {
-                    System.out.println("❌ Erreur inconnue pour " + ym.getMonth() + ": " + e.getMessage());
+                    throw new Exception("❌ Erreur inconnue pour " + ym.getMonth() + ": " + e.getMessage());
                 }
             }
 
@@ -447,10 +491,10 @@ public class SalaireService {
         HttpEntity<String> request = new HttpEntity<>(requestData, headers);
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-              url,
-              HttpMethod.POST,
-              request,
-              String.class
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
             );
 
             System.out.println(response.getBody());
@@ -496,8 +540,8 @@ public class SalaireService {
         for (SalarySlip salarySlip : salarySlips) {
             for (Deduction deduction : salarySlip.getDeductions()) {
                 if (deduction.getSalary_component().equals(componentName)
-                && deduction.getAmount() >= componentMin
-                && deduction.getAmount() <= componentMax) {
+                        && deduction.getAmount() >= componentMin
+                        && deduction.getAmount() <= componentMax) {
                     toReturn.add(salarySlip);
 
                 }
@@ -505,8 +549,8 @@ public class SalaireService {
 
             for (Earning earning : salarySlip.getEarnings()) {
                 if (earning.getSalary_component().equals(componentName)
-                && earning.getAmount() >= componentMin
-                && earning.getAmount() <= componentMax) {
+                        && earning.getAmount() >= componentMin
+                        && earning.getAmount() <= componentMax) {
                     toReturn.add(salarySlip);
                 }
             }

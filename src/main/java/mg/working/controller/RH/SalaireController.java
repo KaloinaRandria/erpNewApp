@@ -254,7 +254,6 @@ public class SalaireController {
     @PostMapping("/generer-salary-slip")
     public String genererSalarySlip(HttpSession session, Model model,
                                     @RequestParam(name = "employe") String employee,
-                                    @RequestParam(name = "structure") String structure,
                                     @RequestParam(name = "startDate") String startDate,
                                     @RequestParam(name = "endDate") String endDate,
                                     @RequestParam(name = "salaireBase") String salaireBase) {
@@ -264,7 +263,7 @@ public class SalaireController {
         }
 
         try {
-            salaireService.generateSalarySlips(sid , employee , structure , startDate , endDate);
+            salaireService.generateSalarySlips(sid , employee, startDate , endDate , Double.parseDouble(salaireBase));
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Erreur : " + e.getMessage());
@@ -273,27 +272,6 @@ public class SalaireController {
 
         return "redirect:/accueil";
     }
-
-//    @PostMapping("/salary-slip/save")
-//    public String insertSalarySlip(HttpSession session, Model model ,
-//                                   @RequestParam(name = "employe") String employe,
-//                                   @RequestParam(name = "structure") String structure,
-//                                   @RequestParam(name = "startDate") String startDate,
-//                                   @RequestParam(name = "endDate") String endDate) {
-//        String sid = (String) session.getAttribute("sid");
-//        if (sid == null) {
-//            return "redirect:/login";
-//        }
-//        try {
-//            this.salaireService.insertSalarySlip(sid , employe, structure, startDate, endDate);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            model.addAttribute("error", "Erreur : " + e.getMessage());
-//            return "error/index";
-//        }
-//
-//        return "redirect:/accueil";
-//    }
 
     @GetMapping("/update-salaire-base-page")
     public String goToUpdateSalaireBase(HttpSession session , Model model) {

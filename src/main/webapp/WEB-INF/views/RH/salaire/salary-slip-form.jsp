@@ -7,7 +7,6 @@
 <%
     List<Employe> employes = (List<Employe>) request.getAttribute("employes");
     List<SalaryStructureForm>  salaryStructureForms = (List<SalaryStructureForm>) request.getAttribute("salaryStructureForms");
-    List<Company> companies = (List<Company>) request.getAttribute("companies");
 %>
 
 <!DOCTYPE html>
@@ -38,27 +37,10 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Salary Structure</label>
-                        <select id="structure" name="structure" class="form-select">
-                            <% for (SalaryStructureForm salaryStructureForm : salaryStructureForms ) {%>
-                            <option value="<%=salaryStructureForm.getName() %>"><%=salaryStructureForm.getName() %></option>
-                            <% } %>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Company</label>
-                        <select id="company" name="company" class="form-select">
-                            <% for (Company company : companies ) {%>
-                            <option value="<%=company.getName() %>"><%=company.getName() %></option>
-                            <% } %>
-                        </select>
-                    </div>
 
                     <div class="col-md-2">
                         <label for="startDate" class="form-label">Salaire de Base</label>
-                        <input type="number" class="form-control" id="salaireBase" name="salaireBase">
+                        <input type="number" class="form-control" id="salaireBase" name="salaireBase" value="0">
                     </div>
 
                     <div class="col-md-2">
