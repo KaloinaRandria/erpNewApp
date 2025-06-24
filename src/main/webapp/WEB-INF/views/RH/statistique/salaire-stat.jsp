@@ -222,7 +222,7 @@
                     data: grossData,
                     borderColor: "blue",
                     borderWidth: 2,
-                    tension: 0.2
+                    tension: 0
                 },
                 {
                     label: "Total Deductions",
@@ -230,14 +230,14 @@
                     borderColor: "black",
                     borderWidth: 2,
                     borderDash: [5, 5],
-                    tension: 0.2
+                    tension: 0
                 },
                 {
                     label: "Net Pay",
                     data: netData,
                     borderColor: "#2c3e50",
                     borderWidth: 2,
-                    tension: 0.2
+                    tension: 0
                 },
 
                 // 👇 Détail des Earnings
@@ -259,7 +259,7 @@
     borderColor: "green",
         borderWidth: 1,
         borderDash: [2, 2],
-        tension: 0.2
+        tension: 0
     },
     <% } %>
 
@@ -282,7 +282,7 @@
     borderColor: "red",
         borderWidth: 1,
         borderDash: [4, 2],
-        tension: 0.2
+        tension: 0
     },
     <% } %>
     ]

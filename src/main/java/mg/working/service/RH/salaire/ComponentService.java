@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.model.RH.salaire.component.SalaryComponent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -68,5 +69,31 @@ public class ComponentService {
             deductions.add(de);
         }
         return deductions;
+    }
+
+    public List<SalaryComponent> getSalaryComponents(String sid) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = erpnextUrl + "/api/resource/Salary Component";
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new Exception("Erreur lors de la récupération des composants Deduction : " + response.getBody());
+        }
+
+        JsonNode data = objectMapper.readTree(response.getBody()).path("data");
+
+        List<SalaryComponent> salaryComponents = new ArrayList<>();
+        for (JsonNode node : data) {
+            SalaryComponent sc = new SalaryComponent();
+            sc.setSalary_component(node.path("name").asText());
+            salaryComponents.add(sc);
+        }
+
+        return salaryComponents;
     }
 }

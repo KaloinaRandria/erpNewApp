@@ -7,6 +7,7 @@ import mg.working.model.RH.salaire.SalaryStructureForm;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.model.RH.salaire.component.SalaryComponent;
 import mg.working.model.RH.vivant.Employe;
 import mg.working.service.RH.salaire.ComponentService;
 import mg.working.service.RH.salaire.SalaireService;
@@ -40,6 +41,7 @@ public class SalaireController {
 
     @Autowired
     private EmployeService employeService;
+
 
 
     @GetMapping("/salary-slip")
@@ -291,5 +293,64 @@ public class SalaireController {
         }
 
         return "redirect:/accueil";
+    }
+
+    @GetMapping("/update-salaire-base-page")
+    public String goToUpdateSalaireBase(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+        try {
+            List<SalaryComponent> salaryComponents = componentService.getSalaryComponents(sid);
+            model.addAttribute("salaryComponents", salaryComponents);
+            return "RH/salaire/update-salaire-base-form";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @PostMapping("/update")
+    public String updateSalaireBase(HttpSession session,
+                                    Model model,
+                                    @RequestParam(name = "component") String component,
+                                    @RequestParam(name = "componentMin") String componentMin,
+                                    @RequestParam(name = "componentMax") String componentMax,
+                                    @RequestParam(name = "salaireMin") String baseMin,
+                                    @RequestParam(name = "salaireMax") String baseMax,
+                                    @RequestParam(name = "pourcentage") String pourcentage) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            salaireService.updateSalary(sid , component,Double.parseDouble(componentMin)  , Double.parseDouble(componentMax)  , Double.parseDouble(baseMin)  , Double.parseDouble(baseMax)  , Double.parseDouble(pourcentage));
+            return "redirect:/login";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error" , "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @GetMapping("/salary-slip-sql")
+    public String getSalSlipSQL(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            List<SalarySlip> salarySlips = salaireService.getAllSalarySlipBySQL(null);
+            model.addAttribute("salarySlips", salarySlips);
+            return "RH/salaire/get-salary-slip-sql";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
     }
 }
