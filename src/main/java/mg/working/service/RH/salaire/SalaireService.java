@@ -8,6 +8,7 @@ import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.service.RH.util.ServiceGeneraliser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class SalaireService {
 
     @Value("${erpnext.url}")
     private String erpnextUrl;
+
+    @Autowired
+    private ServiceGeneraliser serviceGeneraliser;
 
     @Autowired
     DataSource dataSource;
@@ -281,11 +285,11 @@ public class SalaireService {
         return result;
     }
 
-    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate , String ssa) {
+    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate , String ssa ,String company) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String company = "Orinasa SA";
+
 
         String data = "{" +
                 "\"doctype\": \"Salary Slip\"," +
@@ -339,12 +343,12 @@ public class SalaireService {
         }
     }
 
-    public String insertSalaryStructureAssignment(String sid, String employee, String salaryStructure, String startDate, double base) {
+    public String insertSalaryStructureAssignment(String sid, String employee, String salaryStructure, String startDate, double base , String company) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String company = "Orinasa SA";
+
 
         // Construction du JSON pour l'insertion
         String data = "{" +
@@ -460,12 +464,12 @@ public class SalaireService {
                 List<SalarySlip> salarySlips = this.getSalarySlipsByMonth2(sid , startMonth , employeeId);
                 String ssa;
                 if (base > 0 ) {
-                    ssa = this.insertSalaryStructureAssignment(sid , employeeId , salarySlips.get(0).getSalaryStructure() , startDate.toString() , base);
+                    ssa = this.insertSalaryStructureAssignment(sid , employeeId , salarySlips.get(0).getSalaryStructure() , startDate.toString() , base , salarySlips.get(0).getCompany());
                 } else {
                     ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
                 }
                 System.out.println("➡ Tentative de création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
-                insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa);
+                insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
             } catch (Exception e) {
                 if (e.getMessage().contains("already exists") || e.getMessage().contains("Duplicate")) {
                     System.out.println("⚠ Salary Slip déjà existant pour " + ym.getMonth() + " " + ym.getYear() + ", ignoré.");
@@ -603,9 +607,11 @@ public class SalaireService {
         salarySlips = getSalaryFiltre(sid , "Salaire Base" , baseMin , baseMax , salarySlips);
 
         for (SalarySlip salarySlip : salarySlips) {
-            cancelSalarySlip(sid , salarySlip.getName());
+//            cancelSalarySlip(sid , salarySlip.getName());
+            serviceGeneraliser.cancelDoctype(sid , "Salary Slip" ,salarySlip.getName() );
             String structureAssignment = getClosestSalaryAssignementId(sid , salarySlip.getEmployee(), salarySlip.getStartDate().toString());
-            cancelSalaryAssignment(sid , structureAssignment);
+//            cancelSalaryAssignment(sid , structureAssignment);
+            serviceGeneraliser.cancelDoctype(sid , "Salary Structure Assignment" , structureAssignment);
             double base = 0;
             for (Earning earning : salarySlip.getEarnings()) {
                 if (earning.getSalary_component().equals("Salaire Base")) {
@@ -613,8 +619,8 @@ public class SalaireService {
                     System.out.println(base);
                 }
             }
-            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * pourcentage / 100));
-            insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString() , ssa);
+            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * pourcentage / 100) , salarySlip.getCompany());
+            insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString() , ssa , salarySlip.getCompany());
         }
     }
 

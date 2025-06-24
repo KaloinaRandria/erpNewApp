@@ -96,4 +96,32 @@ public class ComponentService {
 
         return salaryComponents;
     }
+
+    public void insertSalaryComponent(String sid, String name, String type, String company) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String data = "{" +
+                "\"doctype\": \"Salary Component\"," +
+                "\"salary_component\": \"" + name + "\"," +
+                "\"type\": \"" + type + "\"," + // "Earning" ou "Deduction"
+                "\"company\": \"" + company + "\"" +
+                "}";
+
+        String url = erpnextUrl + "/api/resource/Salary Component";
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+            System.out.println("✔ Salary Component créé : " + response.getBody());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
