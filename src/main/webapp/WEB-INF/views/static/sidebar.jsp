@@ -33,11 +33,6 @@
           </a>
       </li>
       <li>
-          <a href="${pageContext.request.contextPath}/rh/salaire/salary-structure">
-              <i class="bi bi-circle"></i><span>Ajouter Salary Structure</span>
-          </a>
-      </li>
-      <li>
           <a href="${pageContext.request.contextPath}/rh/salaire/salary-slip-form">
               <i class="bi bi-circle"></i><span>Generer Salary Slip</span>
           </a>
@@ -47,12 +42,16 @@
               <i class="bi bi-circle"></i><span>Update Salaire de Base</span>
           </a>
       </li>
-
-      <li>
-          <a href="${pageContext.request.contextPath}/rh/salaire/salary-slip-sql">
-              <i class="bi bi-circle"></i><span>Salary Slip SQL</span>
-          </a>
-      </li>
+<%--      <li>--%>
+<%--          <a href="${pageContext.request.contextPath}/rh/salaire/salary-structure">--%>
+<%--              <i class="bi bi-circle"></i><span>Ajouter Salary Structure</span>--%>
+<%--          </a>--%>
+<%--      </li>--%>
+<%--      <li>--%>
+<%--          <a href="${pageContext.request.contextPath}/rh/salaire/salary-slip-sql">--%>
+<%--              <i class="bi bi-circle"></i><span>Salary Slip SQL</span>--%>
+<%--          </a>--%>
+<%--      </li>--%>
   </ul>
 
 
