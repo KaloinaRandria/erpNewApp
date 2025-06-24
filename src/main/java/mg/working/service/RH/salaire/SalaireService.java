@@ -281,7 +281,7 @@ public class SalaireService {
         return result;
     }
 
-    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate) {
+    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate , String ssa) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -291,6 +291,7 @@ public class SalaireService {
                 "\"doctype\": \"Salary Slip\"," +
                 "\"employee\": \"" + employee + "\"," +
                 "\"salary_structure\": \"" + structure + "\"," +
+                "\"salary_structure_assignment\": \"" + ssa + "\"," +
                 "\"start_date\": \"" + startDate + "\"," +
                 "\"end_date\": \"" + endDate + "\"," +
                 "\"payroll_frequency\": \"Monthly\"," +
@@ -338,7 +339,7 @@ public class SalaireService {
         }
     }
 
-    public void insertSalaryStructureAssignment(String sid, String employee, String salaryStructure, String startDate, double base) {
+    public String insertSalaryStructureAssignment(String sid, String employee, String salaryStructure, String startDate, double base) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -387,11 +388,17 @@ public class SalaireService {
                     String.class
             );
 
+            if (submitResponse.getStatusCode() == HttpStatus.OK) {
+                JsonNode root = objectMapper.readTree(submitResponse.getBody());
+                return root.path("data").path("name").asText();
+            }
+
             System.out.println("✔ Salary Structure Assignment soumis : " + submitResponse.getBody());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 
@@ -412,8 +419,9 @@ public class SalaireService {
             String eDate = endDate.format(dateFormatter);
 
             try {
+                String ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
                 System.out.println("➡ Tentative de création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
-                insertSalarySlip(sid, employeeId, salaryStructure, sDate, eDate);
+                insertSalarySlip(sid, employeeId, salaryStructure, sDate, eDate, ssa);
             } catch (Exception e) {
                 if (e.getMessage().contains("already exists") || e.getMessage().contains("Duplicate")) {
                     System.out.println("⚠ Salary Slip déjà existant pour " + ym.getMonth() + " " + ym.getYear() + ", ignoré.");
@@ -561,8 +569,8 @@ public class SalaireService {
                     System.out.println(base);
                 }
             }
-            insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * pourcentage / 100));
-            insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString());
+            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * pourcentage / 100));
+            insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString() , ssa);
         }
     }
 
@@ -594,5 +602,6 @@ public class SalaireService {
         }
         return salarySlips;
     }
+
 
 }

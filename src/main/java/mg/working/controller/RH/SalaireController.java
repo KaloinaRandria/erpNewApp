@@ -274,26 +274,26 @@ public class SalaireController {
         return "redirect:/accueil";
     }
 
-    @PostMapping("/salary-slip/save")
-    public String insertSalarySlip(HttpSession session, Model model ,
-                                   @RequestParam(name = "employe") String employe,
-                                   @RequestParam(name = "structure") String structure,
-                                   @RequestParam(name = "startDate") String startDate,
-                                   @RequestParam(name = "endDate") String endDate) {
-        String sid = (String) session.getAttribute("sid");
-        if (sid == null) {
-            return "redirect:/login";
-        }
-        try {
-            this.salaireService.insertSalarySlip(sid , employe, structure, startDate, endDate);
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Erreur : " + e.getMessage());
-            return "error/index";
-        }
-
-        return "redirect:/accueil";
-    }
+//    @PostMapping("/salary-slip/save")
+//    public String insertSalarySlip(HttpSession session, Model model ,
+//                                   @RequestParam(name = "employe") String employe,
+//                                   @RequestParam(name = "structure") String structure,
+//                                   @RequestParam(name = "startDate") String startDate,
+//                                   @RequestParam(name = "endDate") String endDate) {
+//        String sid = (String) session.getAttribute("sid");
+//        if (sid == null) {
+//            return "redirect:/login";
+//        }
+//        try {
+//            this.salaireService.insertSalarySlip(sid , employe, structure, startDate, endDate);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            model.addAttribute("error", "Erreur : " + e.getMessage());
+//            return "error/index";
+//        }
+//
+//        return "redirect:/accueil";
+//    }
 
     @GetMapping("/update-salaire-base-page")
     public String goToUpdateSalaireBase(HttpSession session , Model model) {
@@ -328,7 +328,7 @@ public class SalaireController {
 
         try {
             salaireService.updateSalary(sid , component,Double.parseDouble(componentMin)  , Double.parseDouble(componentMax)  , Double.parseDouble(baseMin)  , Double.parseDouble(baseMax)  , Double.parseDouble(pourcentage));
-            return "redirect:/login";
+            return "redirect:/accueil";
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error" , "Erreur : " + e.getMessage());
