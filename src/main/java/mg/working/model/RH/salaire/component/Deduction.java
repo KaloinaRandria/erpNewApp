@@ -2,8 +2,21 @@ package mg.working.model.RH.salaire.component;
 
 public class Deduction {
     private String salary_component;
-    private double amount;
+    private Double amount;
     private double year_to_date;
+    private boolean selected;
+    private String formula;
+
+    public String getFormula() {
+        return formula;
+    }
+
+    public void setFormula(String formula) {
+        this.formula = formula;
+    }
+
+    public boolean isSelected() { return selected; }
+    public void setSelected(boolean selected) { this.selected = selected; }
 
     // Getters et Setters
 
@@ -15,11 +28,11 @@ public class Deduction {
         this.salary_component = salary_component;
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

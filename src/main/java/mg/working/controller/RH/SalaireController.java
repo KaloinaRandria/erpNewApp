@@ -1,17 +1,26 @@
 package mg.working.controller.RH;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import mg.working.model.RH.organisation.Company;
 import mg.working.model.RH.salaire.SalarySlip;
+import mg.working.model.RH.salaire.SalaryStructureForm;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
+import mg.working.model.RH.salaire.component.Deduction;
+import mg.working.model.RH.salaire.component.Earning;
+import mg.working.model.RH.salaire.component.SalaryComponent;
+import mg.working.model.RH.vivant.Employe;
+import mg.working.service.RH.salaire.ComponentService;
 import mg.working.service.RH.salaire.SalaireService;
+import mg.working.service.RH.salaire.SalaryStructureService;
+import mg.working.service.RH.util.CompanyService;
+import mg.working.service.RH.vivant.EmployeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -24,6 +33,17 @@ public class SalaireController {
 
     @Autowired
     private SalaireService salaireService;
+
+    @Autowired
+    private SalaryStructureService salaryStructureService;
+
+    @Autowired
+    private ComponentService componentService;
+
+    @Autowired
+    private EmployeService employeService;
+
+
 
     @GetMapping("/salary-slip")
     public String getSalarySlipByName(HttpSession session ,
@@ -155,5 +175,217 @@ public class SalaireController {
             model.addAttribute("error", "Erreur lors du chargement des statistiques : " + e.getMessage());
             return "error/index";
         }
+    }
+
+    @PostMapping("/salary-structure/save")
+    public String createSalaryStructure(
+            HttpSession session,
+            @ModelAttribute SalaryStructureForm salaryStructureForm,
+            Model model
+    ) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            List<Earning> earnings = salaryStructureForm.getEarnings()
+                    .stream()
+                    .filter(e -> (e.getAmount() != null && e.getAmount() > 0) || (e.getFormula() != null && !e.getFormula().isEmpty()))
+                    .collect(Collectors.toList());
+
+            List<Deduction> deductions = salaryStructureForm.getDeductions()
+                    .stream()
+                    .filter(d -> (d.getAmount() != null && d.getAmount() > 0) || (d.getFormula() != null && !d.getFormula().isEmpty()))
+                    .collect(Collectors.toList());
+
+            salaryStructureService.createSalaryStructure(
+                    sid,
+                    salaryStructureForm.getName(),
+                    earnings,
+                    deductions
+            );
+
+            model.addAttribute("success", "Structure de salaire créée et soumise avec succès !");
+            return "redirect:/accueil";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+
+    @GetMapping("/salary-structure")
+    public String goToSalaryStructureForm(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) return "redirect:/login";
+
+        try {
+            model.addAttribute("earningsComponents", componentService.getEarnings(sid));
+            model.addAttribute("deductionsComponents",componentService.getDeductions(sid));
+            return "RH/salaire/salary-structure-form";
+        } catch (Exception e) {
+            model.addAttribute("error", "Erreur lors du chargement des composants : " + e.getMessage());
+            e.printStackTrace();
+            return "error/index";
+        }
+    }
+
+    @GetMapping("/salary-slip-form")
+    public String goToSalarySlipForm(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            List<Employe> employes = employeService.listerEmployes(sid);
+            List<SalaryStructureForm> salaryStructureForms = salaryStructureService.listSalaryStructure(sid);
+            List<Company> companies = employeService.getCompanyList(sid);
+            model.addAttribute("employes", employes);
+            model.addAttribute("salaryStructureForms", salaryStructureForms);
+            model.addAttribute("companies", companies);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+        }
+
+        return "RH/salaire/salary-slip-form";
+    }
+
+    @PostMapping("/generer-salary-slip")
+    public String genererSalarySlip(HttpSession session, Model model,
+                                    @RequestParam(name = "employe") String employee,
+                                    @RequestParam(name = "startDate") String startDate,
+                                    @RequestParam(name = "endDate") String endDate,
+                                    @RequestParam(name = "salaireBase") String salaireBase,
+                                    HttpServletRequest request) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+
+            salaireService.generateSalarySlips(sid , employee, startDate , endDate , Double.parseDouble(salaireBase) ,request);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+
+        return "redirect:/accueil";
+    }
+
+    @GetMapping("/update-salaire-base-page")
+    public String goToUpdateSalaireBase(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+        try {
+            List<SalaryComponent> salaryComponents = componentService.getSalaryComponents(sid);
+            model.addAttribute("salaryComponents", salaryComponents);
+            return "RH/salaire/update-salaire-base-form";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @PostMapping("/update")
+    public String updateSalaireBase(HttpSession session,
+                                    Model model,
+                                    @RequestParam(name = "component") String component,
+                                    @RequestParam(name = "componentMin") String componentMin,
+                                    @RequestParam(name = "componentMax") String componentMax,
+                                    @RequestParam(name = "salaireMin") String baseMin,
+                                    @RequestParam(name = "salaireMax") String baseMax,
+                                    @RequestParam(name = "pourcentage") String pourcentage) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            salaireService.updateSalary(sid , component,Double.parseDouble(componentMin)  , Double.parseDouble(componentMax)  , Double.parseDouble(baseMin)  , Double.parseDouble(baseMax)  , Double.parseDouble(pourcentage));
+            return "redirect:/accueil";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error" , "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @GetMapping("/salary-slip-sql")
+    public String getSalSlipSQL(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            List<SalarySlip> salarySlips = salaireService.getAllSalarySlipBySQL(null);
+            model.addAttribute("salarySlips", salarySlips);
+            return "RH/salaire/get-salary-slip-sql";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+    }
+
+    @GetMapping("/filtre-composant")
+    public String goToFiltreByComposant(HttpSession session , Model model) {
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+        try {
+            List<SalaryComponent> salaryComponents = componentService.getSalaryComponents(sid);
+            List<SalarySlip> salarySlips = salaireService.getAllSalarySlips(sid);
+            model.addAttribute("salarySlips", salarySlips);
+            model.addAttribute("salaryComponents", salaryComponents);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+        return "RH/salaire/filtre-sal-slip-by-composant";
+    }
+
+    @PostMapping("/filtre-salaire-component")
+    public String filtreComposant(HttpSession session , Model model,
+                                  @RequestParam(name = "component") String component,
+                                  @RequestParam(name = "componentMin") String componentMin,
+                                  @RequestParam(name = "componentMax") String componentMax) {
+
+        String sid = (String) session.getAttribute("sid");
+        if (sid == null) {
+            return "redirect:/login";
+        }
+        try {
+            List<SalaryComponent> salaryComponents = componentService.getSalaryComponents(sid);
+            List<SalarySlip> salarySlips = salaireService.getAllSalarySlips(sid);
+
+            System.out.println(component);
+            System.out.println(componentMin);
+            System.out.println(componentMax);
+
+
+            if (componentMin != null || componentMax != null || component != null) {
+                salarySlips = salaireService.getSalaryFiltre(sid , component,Double.parseDouble(componentMin)   ,Double.parseDouble(componentMax), salarySlips);
+            } else {
+                salarySlips = salaireService.getAllSalarySlips(sid);
+            }
+            model.addAttribute("salarySlips", salarySlips);
+            model.addAttribute("salaryComponents", salaryComponents);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Erreur : " + e.getMessage());
+            return "error/index";
+        }
+        return "RH/salaire/filtre-sal-slip-by-composant";
+
     }
 }

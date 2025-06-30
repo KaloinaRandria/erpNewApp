@@ -1,18 +1,30 @@
 package mg.working.service.RH.salaire;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.servlet.http.HttpServletRequest;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
 import mg.working.model.RH.salaire.component.Earning;
+import mg.working.service.RH.util.ServiceGeneraliser;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.sql.DataSource;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -23,6 +35,12 @@ public class SalaireService {
     @Value("${erpnext.url}")
     private String erpnextUrl;
 
+    @Autowired
+    private ServiceGeneraliser serviceGeneraliser;
+
+    @Autowired
+    DataSource dataSource;
+
     private static final SimpleDateFormat monthFormatter = new SimpleDateFormat("yyyy-MM");
 
     public List<SalarySlip> getAllSalarySlips(String sid) throws Exception {
@@ -30,7 +48,7 @@ public class SalaireService {
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&limit_page_length=2500"; // seul le name suffit
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\",\"docstatus\"]&limit_page_length=2500"; // seul le name suffit
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -44,9 +62,11 @@ public class SalaireService {
 
         List<SalarySlip> slips = new ArrayList<>();
         for (JsonNode node : data) {
-            String name = node.path("name").asText();
-            SalarySlip slip = getSalarySlipByName(sid, name); // ✅ récupère earnings et deductions
-            slips.add(slip);
+            if (node.path("docstatus").asInt() != 2) {
+                String name = node.path("name").asText();
+                SalarySlip slip = getSalarySlipByName(sid, name); // ✅ récupère earnings et deductions
+                slips.add(slip);
+            }
         }
 
         return slips;
@@ -58,7 +78,7 @@ public class SalaireService {
         headers.add("Cookie", "sid=" + sid);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String fields = "[\"name\"]"; // Récupère juste le nom (clé primaire)
+        String fields = "[\"name\",\"docstatus\"]"; // Récupère juste le nom (clé primaire)
         String filters = "[[\"employee\",\"=\",\"" + employeeId + "\"]]";
         String url = erpnextUrl + "/api/resource/Salary Slip?fields=" + fields + "&filters=" + filters + "&limit_page_length=2500";
 
@@ -75,9 +95,11 @@ public class SalaireService {
         List<SalarySlip> slips = new ArrayList<>();
 
         for (JsonNode node : dataArray) {
-            String name = node.path("name").asText();
-            SalarySlip slip = getSalarySlipByName(sid, name); // Appelle la méthode complète
-            slips.add(slip);
+            if (node.path("docstatus").asInt() != 2) {
+                String name = node.path("name").asText();
+                SalarySlip slip = getSalarySlipByName(sid, name); // ✅ récupère earnings et deductions
+                slips.add(slip);
+            }
         }
 
         return slips;
@@ -168,7 +190,7 @@ public class SalaireService {
         String filters = String.format("[[\"Salary Slip\", \"start_date\", \">=\", \"%s\"], [\"Salary Slip\", \"end_date\", \"<=\", \"%s\"]]&limit_page_length=2500",
                 startDate, endDate);
 
-        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\"]&filters=" + filters;
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"name\",\"docstatus\"]&filters=" + filters;
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
@@ -182,9 +204,11 @@ public class SalaireService {
 
         List<SalarySlip> slips = new ArrayList<>();
         for (JsonNode node : data) {
-            String name = node.path("name").asText();
-            SalarySlip slip = getSalarySlipByName(sid, name); // ✅ earnings + deductions inclus
-            slips.add(slip);
+            if (node.path("docstatus").asInt() != 2) {
+                String name = node.path("name").asText();
+                SalarySlip slip = getSalarySlipByName(sid, name); // ✅ récupère earnings et deductions
+                slips.add(slip);
+            }
         }
 
         return slips;
@@ -261,4 +285,407 @@ public class SalaireService {
 
         return result;
     }
+
+    public void insertSalarySlip(String sid, String employee, String structure, String startDate, String endDate , String ssa ,String company) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+
+        String data = "{" +
+                "\"doctype\": \"Salary Slip\"," +
+                "\"employee\": \"" + employee + "\"," +
+                "\"salary_structure\": \"" + structure + "\"," +
+                "\"salary_structure_assignment\": \"" + ssa + "\"," +
+                "\"start_date\": \"" + startDate + "\"," +
+                "\"end_date\": \"" + endDate + "\"," +
+                "\"payroll_frequency\": \"Monthly\"," +
+                "\"company\": \"" + company + "\"" +
+                "}";
+
+        String createUrl = erpnextUrl + "/api/resource/Salary Slip";
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        try {
+            // 1. Créer le Salary Slip
+            ResponseEntity<String> response = restTemplate.exchange(
+                    createUrl,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+            System.out.println("✔ Salary Slip créé : " + response.getBody());
+
+            // Après création :
+            String body = response.getBody();
+            JSONObject json = new JSONObject(body);
+            JSONObject fullDoc = json.getJSONObject("data");
+
+// Soumettre le Salary Slip
+            String submitUrl = erpnextUrl + "/api/method/frappe.client.submit";
+
+// Important : Frapper veut un champ "doc" contenant un JSON complet de l'objet
+            JSONObject payload = new JSONObject();
+            payload.put("doc", fullDoc);
+
+            HttpEntity<String> submitRequest = new HttpEntity<>(payload.toString(), headers);
+
+            ResponseEntity<String> submitResponse = restTemplate.exchange(
+                    submitUrl,
+                    HttpMethod.POST,
+                    submitRequest,
+                    String.class
+            );
+
+            System.out.println("✔ Salary Slip soumis : " + submitResponse.getBody());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String insertSalaryStructureAssignment(String sid, String employee, String salaryStructure, String startDate, double base , String company) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+
+
+        // Construction du JSON pour l'insertion
+        String data = "{" +
+                "\"doctype\": \"Salary Structure Assignment\"," +
+                "\"employee\": \"" + employee + "\"," +
+                "\"salary_structure\": \"" + salaryStructure + "\"," +
+                "\"from_date\": \"" + startDate + "\"," +
+                "\"base\": " + base + "," +
+                "\"company\": \"" + company + "\"" +
+                "}";
+
+        String createUrl = erpnextUrl + "/api/resource/Salary Structure Assignment";
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        try {
+            // Étape 1 : Création
+            ResponseEntity<String> response = restTemplate.exchange(
+                    createUrl,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+            System.out.println("✔ Salary Structure Assignment créé : " + response.getBody());
+
+            // Étape 2 : Soumission du document (optionnel)
+            String body = response.getBody();
+            JSONObject json = new JSONObject(body);
+            JSONObject fullDoc = json.getJSONObject("data");
+
+            String submitUrl = erpnextUrl + "/api/method/frappe.client.submit";
+
+            JSONObject payload = new JSONObject();
+            payload.put("doc", fullDoc);
+
+            HttpEntity<String> submitRequest = new HttpEntity<>(payload.toString(), headers);
+
+            ResponseEntity<String> submitResponse = restTemplate.exchange(
+                    submitUrl,
+                    HttpMethod.POST,
+                    submitRequest,
+                    String.class
+            );
+
+            if (submitResponse.getStatusCode() == HttpStatus.OK) {
+                JsonNode root = objectMapper.readTree(submitResponse.getBody());
+                return root.path("data").path("name").asText();
+            }
+
+            System.out.println("✔ Salary Structure Assignment soumis : " + submitResponse.getBody());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<SalarySlip> getSalarySlipsByMonth2(String sid , String lastMonth , String employeeId) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = erpnextUrl + "/api/resource/Salary Slip?fields=[\"*\"]&limit_page_length=2500";
+
+        if (lastMonth != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+            YearMonth yearMonth = YearMonth.parse(lastMonth , formatter);
+
+            String startDate = yearMonth.atDay(1).toString();
+            String filters = String.format("[[\"Salary Slip\" , \"start_date\" , \"<=\" , \"%s\"]]" , startDate);
+            url += "&filters="  + filters;
+        }
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("Erreur lors de la récupération des bulletins de salaire : " + response.getStatusCode());
+        }
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode data = root.get("data");
+
+        List<SalarySlip> slips = new ArrayList<>();
+        for (JsonNode node : data) {
+            if (node.path("docstatus").asInt() != 2) {
+                String name = node.path("name").asText();
+                SalarySlip slip = getSalarySlipByName(sid, name);// ✅ récupère earnings et deductions
+                if (slip.getEmployee().equals(employeeId)) {
+                    slips.add(slip);
+                }
+            }
+        }
+        slips.sort(Comparator.comparing(SalarySlip::getStartDate).reversed());
+        return slips;
+    }
+
+    public void generateSalarySlips(String sid, String employeeId, String startMonth, String endMonth , double base , HttpServletRequest request) throws Exception {
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate start = YearMonth.parse(startMonth, monthFormatter).atDay(1);
+        LocalDate end = YearMonth.parse(endMonth, monthFormatter).atEndOfMonth();
+
+        LocalDate current = start;
+        while (!current.isAfter(end)) {
+            YearMonth ym = YearMonth.from(current);
+            LocalDate startDate = ym.atDay(1);
+            LocalDate endDate = ym.atEndOfMonth();
+
+            String sDate = startDate.format(dateFormatter);
+            String eDate = endDate.format(dateFormatter);
+
+            try {
+                List<SalarySlip> salarySlips = this.getSalarySlipsByMonth2(sid , startMonth , employeeId);
+                String ssa;
+
+                if (request.getParameter("moyenneSalaire") != null) {
+                    base = moyenneSalaireBase(salarySlips);
+                    System.out.println("base = " + base);
+                }
+
+
+
+                if (base > 0) {
+                    if (request.getParameter("newSalaire") != null) {
+                        ssa = this.getClosestSalaryAssignementId(sid, employeeId, startDate.toString());
+                        cancelSalaryAssignment(sid, ssa);
+                        ssa = this.insertSalaryStructureAssignment(sid, employeeId, salarySlips.get(0).getSalaryStructure(), startDate.toString(), base, salarySlips.get(0).getCompany());
+                        cancelSalarySlip(sid , salarySlips.get(0).getName());
+                        insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+                    } else {
+                        ssa = this.insertSalaryStructureAssignment(sid, employeeId, salarySlips.get(0).getSalaryStructure(), startDate.toString(), base, salarySlips.get(0).getCompany());
+                        insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+                    }
+                } else {
+                    ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
+                    insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+
+                }
+                System.out.println("➡ Tentative de création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
+            } catch (Exception e) {
+                if (e.getMessage().contains("already exists") || e.getMessage().contains("Duplicate")) {
+                    System.out.println("⚠ Salary Slip déjà existant pour " + ym.getMonth() + " " + ym.getYear() + ", ignoré.");
+                } else {
+                    throw new Exception("❌ Erreur inconnue pour " + ym.getMonth() + ": " + e.getMessage());
+                }
+            }
+
+            current = current.plusMonths(1);
+        }
+    }
+
+    public void cancelSalarySlip(String sid , String salarySlipName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String requestData = "{" +
+                "\"doctype\": \"Salary Slip\"," +
+                "\"name\": \"" + salarySlipName + "\"" +
+                "}";
+        String url = erpnextUrl + "/api/method/frappe.desk.form.save.cancel";
+        HttpEntity<String> request = new HttpEntity<>(requestData, headers);
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+
+            System.out.println(response.getBody());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelSalaryAssignment(String sid , String salaryAssignmentName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String requestData = "{" +
+                "\"doctype\": \"Salary Structure Assignment\"," +
+                "\"name\": \"" + salaryAssignmentName + "\"" +
+                "}";
+        String url = erpnextUrl + "/api/method/frappe.desk.form.save.cancel";
+        HttpEntity<String> request = new HttpEntity<>(requestData, headers);
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<SalarySlip> getSalaryFiltre(String sid ,
+                                            String componentName ,
+                                            double componentMin ,
+                                            double componentMax ,
+                                            List<SalarySlip> salarySlips) throws Exception {
+        List<SalarySlip> toReturn = new ArrayList<>();
+
+        if (salarySlips == null) {
+            salarySlips = this.getAllSalarySlips(sid);
+        }
+
+        for (SalarySlip salarySlip : salarySlips) {
+            for (Deduction deduction : salarySlip.getDeductions()) {
+                if (deduction.getSalary_component().equals(componentName)
+                        && deduction.getAmount() >= componentMin
+                        && deduction.getAmount() <= componentMax) {
+                    toReturn.add(salarySlip);
+
+                }
+            }
+
+            for (Earning earning : salarySlip.getEarnings()) {
+                if (earning.getSalary_component().equals(componentName)
+                        && earning.getAmount() >= componentMin
+                        && earning.getAmount() <= componentMax) {
+                    toReturn.add(salarySlip);
+                }
+            }
+        }
+        return toReturn;
+    }
+
+    public String getClosestSalaryAssignementId(String sid , String employeId , String targetDate) throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", "sid=" + sid);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String filters = String.format("[[\"employee\", \"=\" , \"%s\"], [\"from_date\" , \"<=\" , \"%s\"]]" , employeId, targetDate);
+
+        String url = UriComponentsBuilder.fromHttpUrl(erpnextUrl + "/api/resource/Salary Structure Assignment")
+                .queryParam("fields","[\"name\" , \"from_date\"]")
+                .queryParam("filters", filters)
+                .queryParam("limit_page_length","1000")
+                .queryParam("order_by","from_date desc")
+                .build(false)
+                .toUriString();
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                String.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode data = root.get("data");
+
+            if (data.isArray() && data.size() > 0) {
+                JsonNode firstMatch = data.get(0);
+                return firstMatch.get("name").asText(null);
+            } else {
+                System.out.println("Aucun Salary Assignment trouve pour " + employeId);
+                return null;
+            }
+        } else {
+            throw new Exception("Echec de la recuperation de la Salary Assignment");
+        }
+
+    }
+
+    public void updateSalary(String sid , String component , double componentMin , double componentMax , double baseMin , double baseMax , double pourcentage) throws Exception {
+        List<SalarySlip> salarySlips = getSalaryFiltre(sid , component , componentMin , componentMax , null);
+        salarySlips = getSalaryFiltre(sid , "Salaire Base" , baseMin , baseMax , salarySlips);
+
+        for (SalarySlip salarySlip : salarySlips) {
+            cancelSalarySlip(sid , salarySlip.getName());
+//            serviceGeneraliser.cancelDoctype(sid , "Salary Slip" ,salarySlip.getName() );
+            String structureAssignment = getClosestSalaryAssignementId(sid , salarySlip.getEmployee(), salarySlip.getStartDate().toString());
+            cancelSalaryAssignment(sid , structureAssignment);
+//            serviceGeneraliser.cancelDoctype(sid , "Salary Structure Assignment" , structureAssignment);
+            double base = 0;
+            for (Earning earning : salarySlip.getEarnings()) {
+                if (earning.getSalary_component().equals("Salaire Base")) {
+                    base = earning.getAmount();
+                    System.out.println(base);
+                }
+            }
+            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * (pourcentage / 100)) , salarySlip.getCompany());
+            insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString() , ssa , salarySlip.getCompany());
+        }
+    }
+
+    public List<SalarySlip> getAllSalarySlipBySQL(Connection connection) throws SQLException {
+        List<SalarySlip> salarySlips = new ArrayList<>();
+        boolean check = false;
+        try {
+            if (connection == null) {
+                connection = dataSource.getConnection();
+                check = true;
+            }
+            String sql = "SELECT * FROM `tabSalary Slip`";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                SalarySlip salarySlip = new SalarySlip();
+                salarySlip.setName(resultSet.getString("name"));
+                salarySlip.setEmployee(resultSet.getString("employee"));
+                salarySlip.setEmployeeName(resultSet.getString("employee_name"));
+
+                salarySlips.add(salarySlip);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (check) {
+                connection.close();
+            }
+        }
+        return salarySlips;
+    }
+
+    public double moyenneSalaireBase(List<SalarySlip> salarySlips) {
+        double valiny;
+        double sommeSalaire = 0.0;
+        for (SalarySlip salarySlip : salarySlips) {
+            for (Earning earning : salarySlip.getEarnings()) {
+                if (earning.getSalary_component().equals("Salaire Base")) {
+                    sommeSalaire += earning.getAmount();
+                }
+            }
+        }
+        valiny = sommeSalaire / salarySlips.size();
+
+        return valiny;
+    }
+
+
 }

@@ -89,7 +89,7 @@
                                 <span class="text-muted">-</span>
                                 <% } %>
                             </td>
-                            <td><%= String.format("%.2f", slip.getGrossPay()) %></td>
+                            <td><%=  Formatutil.formaterMontant(slip.getGrossPay()) %></td>
                             <td>
                                 <% if (slip.getDeductions() != null && !slip.getDeductions().isEmpty()) { %>
                                 <ul class="list-unstyled mb-0">
