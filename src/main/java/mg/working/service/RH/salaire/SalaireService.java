@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.servlet.http.HttpServletRequest;
 import mg.working.model.RH.salaire.SalarySlip;
 import mg.working.model.RH.salaire.StatistiqueSalaire;
 import mg.working.model.RH.salaire.component.Deduction;
@@ -444,7 +445,7 @@ public class SalaireService {
         return slips;
     }
 
-    public void generateSalarySlips(String sid, String employeeId, String startMonth, String endMonth , double base) throws Exception {
+    public void generateSalarySlips(String sid, String employeeId, String startMonth, String endMonth , double base , HttpServletRequest request) throws Exception {
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -463,13 +464,31 @@ public class SalaireService {
             try {
                 List<SalarySlip> salarySlips = this.getSalarySlipsByMonth2(sid , startMonth , employeeId);
                 String ssa;
-                if (base > 0 ) {
-                    ssa = this.insertSalaryStructureAssignment(sid , employeeId , salarySlips.get(0).getSalaryStructure() , startDate.toString() , base , salarySlips.get(0).getCompany());
+
+                if (request.getParameter("moyenneSalaire") != null) {
+                    base = moyenneSalaireBase(salarySlips);
+                    System.out.println("base = " + base);
+                }
+
+
+
+                if (base > 0) {
+                    if (request.getParameter("newSalaire") != null) {
+                        ssa = this.getClosestSalaryAssignementId(sid, employeeId, startDate.toString());
+                        cancelSalaryAssignment(sid, ssa);
+                        ssa = this.insertSalaryStructureAssignment(sid, employeeId, salarySlips.get(0).getSalaryStructure(), startDate.toString(), base, salarySlips.get(0).getCompany());
+                        cancelSalarySlip(sid , salarySlips.get(0).getName());
+                        insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+                    } else {
+                        ssa = this.insertSalaryStructureAssignment(sid, employeeId, salarySlips.get(0).getSalaryStructure(), startDate.toString(), base, salarySlips.get(0).getCompany());
+                        insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+                    }
                 } else {
                     ssa = this.getClosestSalaryAssignementId(sid , employeeId , startDate.toString());
+                    insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
+
                 }
                 System.out.println("➡ Tentative de création Salary Slip pour " + ym.getMonth() + " " + ym.getYear());
-                insertSalarySlip(sid, employeeId, salarySlips.get(0).getSalaryStructure(), sDate, eDate, ssa , salarySlips.get(0).getCompany());
             } catch (Exception e) {
                 if (e.getMessage().contains("already exists") || e.getMessage().contains("Duplicate")) {
                     System.out.println("⚠ Salary Slip déjà existant pour " + ym.getMonth() + " " + ym.getYear() + ", ignoré.");
@@ -607,11 +626,11 @@ public class SalaireService {
         salarySlips = getSalaryFiltre(sid , "Salaire Base" , baseMin , baseMax , salarySlips);
 
         for (SalarySlip salarySlip : salarySlips) {
-//            cancelSalarySlip(sid , salarySlip.getName());
-            serviceGeneraliser.cancelDoctype(sid , "Salary Slip" ,salarySlip.getName() );
+            cancelSalarySlip(sid , salarySlip.getName());
+//            serviceGeneraliser.cancelDoctype(sid , "Salary Slip" ,salarySlip.getName() );
             String structureAssignment = getClosestSalaryAssignementId(sid , salarySlip.getEmployee(), salarySlip.getStartDate().toString());
-//            cancelSalaryAssignment(sid , structureAssignment);
-            serviceGeneraliser.cancelDoctype(sid , "Salary Structure Assignment" , structureAssignment);
+            cancelSalaryAssignment(sid , structureAssignment);
+//            serviceGeneraliser.cancelDoctype(sid , "Salary Structure Assignment" , structureAssignment);
             double base = 0;
             for (Earning earning : salarySlip.getEarnings()) {
                 if (earning.getSalary_component().equals("Salaire Base")) {
@@ -619,7 +638,7 @@ public class SalaireService {
                     System.out.println(base);
                 }
             }
-            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * pourcentage / 100) , salarySlip.getCompany());
+            String ssa = insertSalaryStructureAssignment(sid , salarySlip.getEmployee(), salarySlip.getSalaryStructure(), salarySlip.getStartDate().toString(), base + (base * (pourcentage / 100)) , salarySlip.getCompany());
             insertSalarySlip(sid , salarySlip.getEmployee() , salarySlip.getSalaryStructure() , salarySlip.getStartDate().toString() , salarySlip.getEndDate().toString() , ssa , salarySlip.getCompany());
         }
     }
@@ -651,6 +670,21 @@ public class SalaireService {
             }
         }
         return salarySlips;
+    }
+
+    public double moyenneSalaireBase(List<SalarySlip> salarySlips) {
+        double valiny;
+        double sommeSalaire = 0.0;
+        for (SalarySlip salarySlip : salarySlips) {
+            for (Earning earning : salarySlip.getEarnings()) {
+                if (earning.getSalary_component().equals("Salaire Base")) {
+                    sommeSalaire += earning.getAmount();
+                }
+            }
+        }
+        valiny = sommeSalaire / salarySlips.size();
+
+        return valiny;
     }
 
 

@@ -20,7 +20,7 @@ public class ServiceGeneraliser {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String requestData = "{" +
-                "\"doctype\": " + doctypeName +"," +
+                "\"doctype\": \"" + doctypeName +"\"," +
                 "\"name\": \"" + name + "\"" +
                 "}";
         String url = erpnextUrl + "/api/method/frappe.desk.form.save.cancel";

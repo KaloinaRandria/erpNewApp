@@ -42,6 +42,11 @@
               <i class="bi bi-circle"></i><span>Update Salaire de Base</span>
           </a>
       </li>
+      <li>
+          <a href="${pageContext.request.contextPath}/rh/salaire/filtre-composant">
+              <i class="bi bi-circle"></i><span>Filtre Salary Slip par composant</span>
+          </a>
+      </li>
 <%--      <li>--%>
 <%--          <a href="${pageContext.request.contextPath}/rh/salaire/salary-structure">--%>
 <%--              <i class="bi bi-circle"></i><span>Ajouter Salary Structure</span>--%>

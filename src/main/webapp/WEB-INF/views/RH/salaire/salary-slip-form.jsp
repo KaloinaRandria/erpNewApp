@@ -37,6 +37,15 @@
                         </select>
                     </div>
 
+                    <div class="col-md-2">
+                        <label for="newSalaire" class="form-label">Ecraser Salaire</label>
+                        <input type="checkbox" id="newSalaire" name="newSalaire">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="moyenneSalaire" class="form-label">Moyenne Salaire</label>
+                        <input type="checkbox" id="moyenneSalaire" name="moyenneSalaire">
+                    </div>
 
                     <div class="col-md-2">
                         <label for="startDate" class="form-label">Salaire de Base</label>
